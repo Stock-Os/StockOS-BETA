@@ -1,6 +1,6 @@
 {
   "name": "stockos-beta",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Stock OS - Coach sport + nutrition personnalisé avec déploiement automatique",
   "main": "index.js",
   "scripts": {
@@ -54,9 +54,9 @@
     "version": {
       "major": 1,
       "minor": 0,
-      "patch": 5,
-      "updateCount": 5,
-      "name": "Stock OS V.1.0.5"
+      "patch": 7,
+      "updateCount": 7,
+      "name": "Stock OS V.1.0.7"
     },
     "config": {
       "githubBranch": "422e1b96-792f-45a8-82a6-397c45abc8aa",

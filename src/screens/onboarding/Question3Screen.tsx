@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import RulerPicker from 'react-native-ruler-picker';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
@@ -67,51 +67,38 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
                 {selectedAge} ans
               </Text>
             </View>
-            <View style={styles.sliderContainer}>
-              <MultiSlider
-                values={[selectedAge]}
+            <View style={styles.rulerContainer}>
+              <RulerPicker
                 min={14}
                 max={80}
                 step={1}
-                sliderLength={280}
-                onValuesChange={(values) => setSelectedAge(values[0])}
-                selectedStyle={{
-                  backgroundColor: theme.colors.primary,
+                fractionDigits={0}
+                initialValue={selectedAge}
+                onValueChange={(value) => {
+                  if (typeof value === 'number' && !isNaN(value)) {
+                    setSelectedAge(Math.round(value));
+                  }
                 }}
-                unselectedStyle={{
-                  backgroundColor: theme.colors.neutral[200],
+                onValueChangeComplete={(value) => {
+                  if (typeof value === 'number' && !isNaN(value)) {
+                    setSelectedAge(Math.round(value));
+                  }
                 }}
-                markerStyle={{
-                  backgroundColor: theme.colors.primary,
-                  height: 25,
-                  width: 25,
-                  borderRadius: 12.5,
-                  borderWidth: 2,
-                  borderColor: '#FFFFFF',
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-                  elevation: 5,
+                width={300}
+                height={80}
+                indicatorColor={theme.colors.primary || '#007AFF'}
+                indicatorSize={16}
+                valueTextStyle={{ 
+                  fontSize: 16, 
+                  color: theme.colors.text?.primary || '#000',
+                  fontWeight: '500'
                 }}
-                trackStyle={{
-                  height: 6,
-                  borderRadius: 3,
+                unitTextStyle={{ 
+                  fontSize: 12, 
+                  color: theme.colors.text?.light || '#666'
                 }}
-                touchDimensions={{
-                  height: 40,
-                  width: 40,
-                  borderRadius: 20,
-                  slipDisplacement: 40,
-                }}
+                backgroundColor="transparent"
               />
-              <View style={styles.sliderLabels}>
-                <Text style={[styles.sliderLabel, { color: theme.colors.text.light }]}>14</Text>
-                <Text style={[styles.sliderLabel, { color: theme.colors.text.light }]}>80</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -182,26 +169,17 @@ const styles = StyleSheet.create({
   },
   ageDisplay: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   ageValue: {
     fontSize: 32,
     fontWeight: 'bold',
   },
-  sliderContainer: {
+  rulerContainer: {
     width: '100%',
     alignItems: 'center',
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 280,
-    marginTop: 10,
-    paddingHorizontal: 5,
-  },
-  sliderLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    justifyContent: 'center',
+    flex: 1,
   },
   footer: {
     paddingTop: 20,
