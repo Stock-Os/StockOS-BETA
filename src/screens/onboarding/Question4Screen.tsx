@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { WheelPicker } from '../../components/ui/WheelPicker';
+import RulerPicker from 'react-native-ruler-picker';
 import { OnboardingStackParamList } from '../../types';
 
 type Question4ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question4'>;
@@ -24,12 +24,6 @@ export const Question4Screen: React.FC<Question4ScreenProps> = ({ navigation }) 
   const { updateOnboardingData } = useUserData();
   
   const [selectedHeight, setSelectedHeight] = useState(170);
-
-  // Generate height options from 140cm to 220cm
-  const heightOptions = Array.from({ length: 81 }, (_, index) => ({
-    value: index + 140,
-    label: `${index + 140} cm`,
-  }));
 
   const handleNext = () => {
     updateOnboardingData({ height: selectedHeight });
@@ -68,12 +62,25 @@ export const Question4Screen: React.FC<Question4ScreenProps> = ({ navigation }) 
           </Text>
 
           <View style={styles.pickerContainer}>
-            <WheelPicker
-              data={heightOptions}
-              selectedValue={selectedHeight}
-              onSelectionChange={setSelectedHeight}
-              itemHeight={60}
-              visibleItems={5}
+            <View style={styles.heightDisplay}>
+              <Text style={[styles.heightValue, { color: theme.colors.primary }]}>
+                {selectedHeight} cm
+              </Text>
+            </View>
+            <RulerPicker
+              min={140}
+              max={220}
+              step={1}
+              fractionDigits={0}
+              initialValue={selectedHeight}
+              onValueChange={setSelectedHeight}
+              onValueChangeComplete={setSelectedHeight}
+              width={300}
+              height={100}
+              indicatorColor={theme.colors.primary}
+              indicatorSize={20}
+              valueTextStyle={{ fontSize: 18, color: theme.colors.text.primary }}
+              unitTextStyle={{ fontSize: 14, color: theme.colors.text.light }}
             />
           </View>
         </View>
@@ -138,8 +145,17 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   pickerContainer: {
-    height: 300,
+    height: 200,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heightDisplay: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  heightValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
   },
   footer: {
     paddingTop: 20,

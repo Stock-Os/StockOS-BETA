@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { WheelPicker } from '../../components/ui/WheelPicker';
+import RulerPicker from 'react-native-ruler-picker';
 import { OnboardingStackParamList } from '../../types';
 
 type Question5ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question5'>;
@@ -68,12 +68,25 @@ export const Question5Screen: React.FC<Question5ScreenProps> = ({ navigation }) 
           </Text>
 
           <View style={styles.pickerContainer}>
-            <WheelPicker
-              data={weightOptions}
-              selectedValue={selectedWeight}
-              onSelectionChange={setSelectedWeight}
-              itemHeight={60}
-              visibleItems={5}
+            <View style={styles.weightDisplay}>
+              <Text style={[styles.weightValue, { color: theme.colors.primary }]}>
+                {selectedWeight} kg
+              </Text>
+            </View>
+            <RulerPicker
+              min={30}
+              max={200}
+              step={0.5}
+              fractionDigits={1}
+              initialValue={selectedWeight}
+              onValueChange={setSelectedWeight}
+              onValueChangeComplete={setSelectedWeight}
+              width={300}
+              height={100}
+              indicatorColor={theme.colors.primary}
+              indicatorSize={20}
+              valueTextStyle={{ fontSize: 18, color: theme.colors.text.primary }}
+              unitTextStyle={{ fontSize: 14, color: theme.colors.text.light }}
             />
           </View>
         </View>
@@ -138,8 +151,17 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   pickerContainer: {
-    height: 300,
+    height: 200,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  weightDisplay: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  weightValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
   },
   footer: {
     paddingTop: 20,

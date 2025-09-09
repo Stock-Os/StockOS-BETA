@@ -89,6 +89,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleDemoLogin = async () => {
+    try {
+      // Connexion automatique avec des credentials de démo
+      await signIn('demo@stockos.com', 'demo123');
+    } catch (error: any) {
+      Alert.alert(
+        'Erreur Mode Démo',
+        'Impossible de se connecter en mode démo'
+      );
+    }
+  };
+
   const GoogleIcon = () => (
     <Svg width={20} height={20} viewBox="0 0 24 24">
       <Path
@@ -225,6 +237,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
+          {/* Bouton Mode Démo */}
+          <Button
+            title="Mode Démo"
+            onPress={handleDemoLogin}
+            loading={state.isLoading}
+            fullWidth
+            variant="secondary"
+            style={styles.demoButton}
+          />
+
           <View style={styles.footer}>
             <Text style={[styles.footerText, { color: theme.colors.text.light }]}>
               Vous n'avez pas de compte ?{' '}
@@ -300,6 +322,9 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginTop: 8,
+  },
+  demoButton: {
+    marginBottom: 24,
   },
   divider: {
     flexDirection: 'row',

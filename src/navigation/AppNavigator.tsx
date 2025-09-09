@@ -5,7 +5,6 @@ import { useUserData } from '../contexts/UserDataContext';
 import { AuthNavigator } from './AuthNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainNavigator } from './MainNavigator';
-import { ProgramGenerationScreen } from '../screens/ProgramGenerationScreen';
 import { RootStackParamList } from '../types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -30,7 +29,6 @@ export const AppNavigator: React.FC = () => {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-        <Stack.Screen name="ProgramGeneration" component={ProgramGenerationScreen} />
       </Stack.Navigator>
     );
   }

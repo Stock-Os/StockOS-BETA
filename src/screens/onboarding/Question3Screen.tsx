@@ -7,10 +7,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { WheelPicker } from '../../components/ui/WheelPicker';
 import { OnboardingStackParamList } from '../../types';
 
 type Question3ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question3'>;
@@ -24,12 +24,6 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
   const { updateOnboardingData } = useUserData();
   
   const [selectedAge, setSelectedAge] = useState(25);
-
-  // Generate age options from 14 to 80
-  const ageOptions = Array.from({ length: 67 }, (_, index) => ({
-    value: index + 14,
-    label: `${index + 14} ans`,
-  }));
 
   const handleNext = () => {
     updateOnboardingData({ age: selectedAge });
@@ -68,13 +62,57 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
           </Text>
 
           <View style={styles.pickerContainer}>
-            <WheelPicker
-              data={ageOptions}
-              selectedValue={selectedAge}
-              onSelectionChange={setSelectedAge}
-              itemHeight={60}
-              visibleItems={5}
-            />
+            <View style={styles.ageDisplay}>
+              <Text style={[styles.ageValue, { color: theme.colors.primary }]}>
+                {selectedAge} ans
+              </Text>
+            </View>
+            <View style={styles.sliderContainer}>
+              <MultiSlider
+                values={[selectedAge]}
+                min={14}
+                max={80}
+                step={1}
+                sliderLength={280}
+                onValuesChange={(values) => setSelectedAge(values[0])}
+                selectedStyle={{
+                  backgroundColor: theme.colors.primary,
+                }}
+                unselectedStyle={{
+                  backgroundColor: theme.colors.neutral[200],
+                }}
+                markerStyle={{
+                  backgroundColor: theme.colors.primary,
+                  height: 25,
+                  width: 25,
+                  borderRadius: 12.5,
+                  borderWidth: 2,
+                  borderColor: '#FFFFFF',
+                  shadowColor: '#000',
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                }}
+                trackStyle={{
+                  height: 6,
+                  borderRadius: 3,
+                }}
+                touchDimensions={{
+                  height: 40,
+                  width: 40,
+                  borderRadius: 20,
+                  slipDisplacement: 40,
+                }}
+              />
+              <View style={styles.sliderLabels}>
+                <Text style={[styles.sliderLabel, { color: theme.colors.text.light }]}>14</Text>
+                <Text style={[styles.sliderLabel, { color: theme.colors.text.light }]}>80</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -138,8 +176,32 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   pickerContainer: {
-    height: 300,
+    height: 200,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ageDisplay: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  ageValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  sliderContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 280,
+    marginTop: 10,
+    paddingHorizontal: 5,
+  },
+  sliderLabel: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   footer: {
     paddingTop: 20,
