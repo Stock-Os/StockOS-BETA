@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🚀 Stock OS - Déploiement Automatique",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "deploy"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Déploiement complet: version + copie locale + GitHub + Expo"
+        },
+        {
+            "label": "📊 Stock OS - Mise à jour Version",
+            "type": "shell", 
+            "command": "npm",
+            "args": ["run", "update"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "Met à jour uniquement le numéro de version"
+        },
+        {
+            "label": "⚙️ Stock OS - Configuration Initiale",
+            "type": "shell",
+            "command": "npm", 
+            "args": ["run", "setup"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "Configuration automatique du projet"
+        }
+    ]
+}

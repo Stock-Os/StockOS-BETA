@@ -1,0 +1,27 @@
+{
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.git/**": true,
+        "**/Version/**": true,
+        "**/.expo/**": true,
+        "**/build/**": true
+    },
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    },
+    "terminal.integrated.env.windows": {
+        "STOCKOS_AUTO_DEPLOY": "true",
+        "NODE_ENV": "development"
+    },
+    "stockos.project": {
+        "name": "Stock OS Beta",
+        "version": "1.0.1",
+        "autoUpdate": true
+    },
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    }
+}

@@ -1,0 +1,20 @@
+[
+    {
+        "key": "ctrl+shift+u",
+        "command": "workbench.action.tasks.runTask",
+        "args": "🚀 Stock OS - Déploiement Automatique",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+v",
+        "command": "workbench.action.tasks.runTask",
+        "args": "📊 Stock OS - Mise à jour Version",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+s",
+        "command": "workbench.action.tasks.runTask",
+        "args": "⚙️ Stock OS - Configuration Initiale",
+        "when": "!terminalFocus"
+    }
+]

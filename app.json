@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Stock OS V.1.0.3",
+    "slug": "stockos-beta",
+    "version": "1.0.3",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stockos.beta"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.stockos.beta"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "56d8c979-c175-45a5-b546-c2d76d3cdf9e"
+      }
+    },
+    "owner": "stockos",
+    "runtimeVersion": "1.0.3"
+  }
+}
