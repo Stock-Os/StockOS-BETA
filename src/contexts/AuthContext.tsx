@@ -71,23 +71,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const bootstrapAsync = async () => {
+      console.log('AuthContext: Starting bootstrap...');
       let user: User | null = null;
 
       try {
         const userToken = await AsyncStorage.getItem('userToken');
         const userData = await AsyncStorage.getItem('userData');
         
+        console.log('AuthContext: userToken:', !!userToken);
+        console.log('AuthContext: userData:', !!userData);
+        
         if (userToken && userData) {
           user = JSON.parse(userData);
+          console.log('AuthContext: User restored:', user.email);
         }
       } catch (error) {
         console.error('Restoring token failed:', error);
       }
 
+      console.log('AuthContext: Dispatching RESTORE_TOKEN...');
       dispatch({ type: 'RESTORE_TOKEN', user });
     };
 
-    bootstrapAsync();
+    // Safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('AuthContext: Safety timeout triggered - forcing loading off');
+      dispatch({ type: 'SET_LOADING', isLoading: false });
+    }, 5000);
+
+    bootstrapAsync().finally(() => {
+      clearTimeout(timeoutId);
+    });
   }, []);
 
   const signIn = async (email: string, password: string) => {

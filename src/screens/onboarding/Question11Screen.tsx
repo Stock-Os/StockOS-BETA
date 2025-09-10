@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { WheelPicker } from '../../components/ui/WheelPicker';
+import { BackButton } from '../../components/ui/BackButton';
 import { OnboardingStackParamList } from '../../types';
 
 type Question11ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question11'>;
@@ -20,20 +20,24 @@ export const Question11Screen: React.FC<Question11ScreenProps> = ({ navigation }
   
   const [selectedDays, setSelectedDays] = useState(3);
 
-  const daysOptions = Array.from({ length: 7 }, (_, index) => ({
-    value: index + 1,
-    label: `${index + 1} jour${index > 0 ? 's' : ''} par semaine`,
-  }));
+  const daysOptions = [1, 2, 3, 4, 5, 6, 7];
 
   const handleNext = () => {
     updateOnboardingData({ workoutDaysPerWeek: selectedDays });
     navigation.navigate('Question12');
   };
 
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <View style={styles.backButtonContainer}>
+            <BackButton onPress={handleBack} />
+          </View>
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { backgroundColor: theme.colors.neutral[200] }]}>
               <View 
@@ -61,14 +65,39 @@ export const Question11Screen: React.FC<Question11ScreenProps> = ({ navigation }
             Nous adapterons votre programme à votre disponibilité
           </Text>
 
-          <View style={styles.pickerContainer}>
-            <WheelPicker
-              data={daysOptions}
-              selectedValue={selectedDays}
-              onSelectionChange={setSelectedDays}
-              itemHeight={60}
-              visibleItems={5}
-            />
+          <View style={styles.optionsContainer}>
+            {daysOptions.map((days) => (
+              <TouchableOpacity
+                key={days}
+                onPress={() => setSelectedDays(days)}
+                style={[
+                  styles.option,
+                  {
+                    backgroundColor: selectedDays === days ? theme.colors.primary + '20' : theme.colors.surface,
+                    borderColor: selectedDays === days ? theme.colors.primary : theme.colors.neutral[300],
+                  }
+                ]}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.optionText,
+                  {
+                    color: selectedDays === days ? theme.colors.primary : theme.colors.text.primary,
+                    fontWeight: selectedDays === days ? '700' : '500',
+                  }
+                ]}>
+                  {days} jour{days > 1 ? 's' : ''}
+                </Text>
+                <Text style={[
+                  styles.optionSubtext,
+                  {
+                    color: selectedDays === days ? theme.colors.primary : theme.colors.text.secondary,
+                  }
+                ]}>
+                  par semaine
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -85,16 +114,74 @@ export const Question11Screen: React.FC<Question11ScreenProps> = ({ navigation }
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContent: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 20, paddingBottom: 32 },
-  header: { marginBottom: 40 },
-  progressContainer: { alignItems: 'center' },
-  progressBar: { width: '100%', height: 4, borderRadius: 2, marginBottom: 12 },
-  progress: { height: '100%', borderRadius: 2 },
-  progressText: { fontSize: 14, fontWeight: '500' },
-  content: { flex: 1, justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 16, lineHeight: 36 },
-  subtitle: { fontSize: 16, textAlign: 'center', lineHeight: 24, marginBottom: 48 },
-  pickerContainer: { height: 300, justifyContent: 'center' },
-  footer: { paddingTop: 20 },
+  container: { 
+    flex: 1 
+  },
+  scrollContent: { 
+    flexGrow: 1, 
+    paddingHorizontal: 24, 
+    paddingTop: 20, 
+    paddingBottom: 32 
+  },
+  header: { 
+    marginBottom: 40 
+  },
+  backButtonContainer: {
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  progressContainer: { 
+    alignItems: 'center' 
+  },
+  progressBar: { 
+    width: '100%', 
+    height: 4, 
+    borderRadius: 2, 
+    marginBottom: 12 
+  },
+  progress: { 
+    height: '100%', 
+    borderRadius: 2 
+  },
+  progressText: { 
+    fontSize: 14, 
+    fontWeight: '500' 
+  },
+  content: { 
+    flex: 1, 
+    justifyContent: 'center' 
+  },
+  title: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 16, 
+    lineHeight: 36 
+  },
+  subtitle: { 
+    fontSize: 16, 
+    textAlign: 'center', 
+    lineHeight: 24, 
+    marginBottom: 48 
+  },
+  optionsContainer: {
+    paddingHorizontal: 20,
+  },
+  option: {
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  optionSubtext: {
+    fontSize: 14,
+  },
+  footer: { 
+    paddingTop: 20 
+  },
 });

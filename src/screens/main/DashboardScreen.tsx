@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,232 +11,222 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { StepsTracker } from '../../components/ui/StepsTracker';
-import { CaloriesTracker } from '../../components/ui/CaloriesTracker';
-import { HydrationTracker } from '../../components/ui/HydrationTracker';
-import { MoodSelector } from '../../components/ui/MoodSelector';
-import Svg, { Path, Circle } from 'react-native-svg';
+import { SemaineWidget } from '../../components/ui/SemaineWidget';
+import { DashboardCard } from '../../components/ui/DashboardCard';
+import { SquircleView } from 'expo-squircle-view';
 
 export const DashboardScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { userData, dailyData, updateDailyData } = useUserData();
+  const { userData } = useUserData();
   const { user } = useAuth();
-  
-  const [currentDate] = useState(new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }));
 
-  // Example daily goals based on user data
-  const dailyGoals = {
-    calories: 2200, // Would be calculated based on user profile
-    steps: 10000,
-    water: 8, // glasses
-    workouts: userData?.workoutDaysPerWeek || 3,
-  };
+  // Friends avatars data
+  const friends = [
+    { id: 1, avatar: '👦🏽', color: '#F59E0B' },
+    { id: 2, avatar: '👨🏿', color: '#10B981' },
+    { id: 3, avatar: '👨🏼', color: '#F59E0B' },
+    { id: 4, avatar: '👩🏼', color: '#6B7280' },
+    { id: 5, avatar: '👩🏻', color: '#EF4444' },
+  ];
 
-  const todayProgress = {
-    calories: dailyData?.caloriesConsumed || 0,
-    steps: dailyData?.steps || 0,
-    water: dailyData?.waterGlasses || 0,
-    mood: dailyData?.mood || 'neutral',
-    workoutCompleted: dailyData?.workoutCompleted || false,
-  };
-
-  const FireIcon = () => (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path
-        d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04.01 2.65-2.15 4.8-4.8 4.8z"
-        fill={theme.colors.semantic.warning}
-      />
-    </Svg>
-  );
-
-  const DropletIcon = () => (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path
-        d="M12 2l-7 9c0 3.87 3.13 7 7 7s7-3.13 7-7l-7-9z"
-        fill={theme.colors.semantic.info}
-      />
-    </Svg>
-  );
-
-  const HeartIcon = () => (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path
-        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-        fill={theme.colors.semantic.error}
-      />
-    </Svg>
-  );
-
-  const TrophyIcon = () => (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path
-        d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2h1a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-1H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1z"
-        fill={theme.colors.primary}
-      />
-    </Svg>
-  );
+  // Week days data
+  const weekDays = [
+    { day: 'SAM', date: 7, isToday: true },
+    { day: 'DIM', date: 7 },
+    { day: 'LUN', date: 8 },
+    { day: 'MAR', date: 9 },
+    { day: 'MER', date: 10 },
+    { day: 'JEU', date: 11 },
+    { day: 'VEN', date: 12 },
+  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        
+        {/* Header avec avatar et nom */}
         <View style={styles.header}>
-          <View>
-            <Text style={[styles.greeting, { color: theme.colors.text.secondary }]}>
-              Bonjour {userData?.firstName || user?.displayName || 'Champion'} 👋
-            </Text>
-            <Text style={[styles.date, { color: theme.colors.text.primary }]}>
-              {currentDate}
-            </Text>
+          <View style={styles.userInfo}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarEmoji}>👩🏻‍💻</Text>
+            </View>
+            <View>
+              <Text style={[styles.welcome, { color: theme.colors.text.secondary }]}>
+                Welcome 👋
+              </Text>
+              <Text style={[styles.userName, { color: theme.colors.text.primary }]}>
+                Sophia Muller
+              </Text>
+            </View>
           </View>
           
-          <TouchableOpacity style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
-            <FireIcon />
-            <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-              7j
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Quick Stats */}
-        <View style={styles.quickStatsContainer}>
-          <View style={[styles.quickStat, { backgroundColor: theme.colors.surface }]}>
-            <HeartIcon />
-            <Text style={[styles.quickStatNumber, { color: theme.colors.text.primary }]}>
-              {Math.round((todayProgress.calories / dailyGoals.calories) * 100)}%
-            </Text>
-            <Text style={[styles.quickStatLabel, { color: theme.colors.text.secondary }]}>
-              Calories
-            </Text>
-          </View>
-
-          <View style={[styles.quickStat, { backgroundColor: theme.colors.surface }]}>
-            <DropletIcon />
-            <Text style={[styles.quickStatNumber, { color: theme.colors.text.primary }]}>
-              {todayProgress.water}/{dailyGoals.water}
-            </Text>
-            <Text style={[styles.quickStatLabel, { color: theme.colors.text.secondary }]}>
-              Verres
-            </Text>
-          </View>
-
-          <View style={[styles.quickStat, { backgroundColor: theme.colors.surface }]}>
-            <TrophyIcon />
-            <Text style={[styles.quickStatNumber, { color: theme.colors.text.primary }]}>
-              {todayProgress.workoutCompleted ? '✓' : '0/1'}
-            </Text>
-            <Text style={[styles.quickStatLabel, { color: theme.colors.text.secondary }]}>
-              Workout
-            </Text>
-          </View>
-        </View>
-
-        {/* Today's Progress */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-            Progression du jour
-          </Text>
-
-          <View style={styles.trackersContainer}>
-            <CaloriesTracker
-              current={todayProgress.calories}
-              goal={dailyGoals.calories}
-              onUpdate={(calories) => updateDailyData({ caloriesConsumed: calories })}
-            />
-
-            <StepsTracker
-              steps={todayProgress.steps}
-              goal={dailyGoals.steps}
-              onUpdate={(steps) => updateDailyData({ steps })}
-            />
-
-            <HydrationTracker
-              current={todayProgress.water}
-              goal={dailyGoals.water}
-              onUpdate={(glasses) => updateDailyData({ waterGlasses: glasses })}
-            />
-          </View>
-        </View>
-
-        {/* Mood Check */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-            Comment vous sentez-vous ?
-          </Text>
-
-          <MoodSelector
-            selectedMood={todayProgress.mood}
-            onMoodChange={(mood) => updateDailyData({ mood })}
-          />
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-            Actions rapides
-          </Text>
-
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
-              onPress={() => Alert.alert('Workout', 'Fonctionnalité bientôt disponible')}
-            >
-              <Text style={[styles.actionButtonText, { color: theme.colors.text.inverse }]}>
-                🏋️‍♂️ Commencer l'entraînement
-              </Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.iconButton}>
+              <Text style={styles.icon}>🔍</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: theme.colors.surface, borderWidth: 2, borderColor: theme.colors.primary }]}
-              onPress={() => Alert.alert('Nutrition', 'Fonctionnalité bientôt disponible')}
-            >
-              <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>
-                🍎 Scanner un aliment
-              </Text>
+            <TouchableOpacity style={styles.iconButton}>
+              <Text style={styles.icon}>🔔</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Weekly Overview */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-            Cette semaine
+        {/* Daily Challenge Card */}
+        <DashboardCard
+          title="Daily Challenge"
+          subtitle="Sprint for 30 seconds. Repeat this interval 5 times."
+          icon="🏃‍♀️"
+          backgroundColor="#8B7CF6"
+          style={styles.challengeCard}
+          onPress={() => Alert.alert('Challenge', 'Starting daily challenge...')}
+        >
+          <View style={styles.challengeActions}>
+            <TouchableOpacity style={styles.dismissButton}>
+              <Text style={styles.dismissText}>✕</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.doneButton}>
+              <Text style={styles.doneText}>Done ›</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.addButton}>
+              <Text style={styles.addText}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </DashboardCard>
+
+        {/* Friends Section */}
+        <View style={styles.friendsSection}>
+          <Text style={[styles.friendsTitle, { color: theme.colors.text.primary }]}>
+            Friends:
           </Text>
+          <View style={styles.friendsList}>
+            {friends.map((friend) => (
+              <TouchableOpacity key={friend.id} style={[styles.friendAvatar, { backgroundColor: friend.color }]}>
+                <Text style={styles.friendEmoji}>{friend.avatar}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
-          <View style={[styles.weeklyCard, { backgroundColor: theme.colors.surface }]}>
-            <View style={styles.weeklyRow}>
-              <Text style={[styles.weeklyLabel, { color: theme.colors.text.secondary }]}>
-                Entraînements
-              </Text>
-              <Text style={[styles.weeklyValue, { color: theme.colors.text.primary }]}>
-                2/3
-              </Text>
+        {/* Semaine Widget */}
+        <SemaineWidget days={weekDays} />
+
+        {/* Dashboard Section */}
+        <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+          Dashboard
+        </Text>
+
+        {/* Dashboard Grid */}
+        <View style={styles.dashboardGrid}>
+          {/* Première ligne */}
+          <View style={styles.gridRow}>
+            <View style={styles.gridItemLarge}>
+              <DashboardCard
+                title="Programme Sportif"
+                icon="🏋️"
+                backgroundColor="#F3F4F6"
+                textColor="#1F2937"
+                onPress={() => Alert.alert('Programme', 'Navigation vers programme sportif')}
+              />
             </View>
-
-            <View style={styles.weeklyRow}>
-              <Text style={[styles.weeklyLabel, { color: theme.colors.text.secondary }]}>
-                Calories moyennes
-              </Text>
-              <Text style={[styles.weeklyValue, { color: theme.colors.text.primary }]}>
-                2.1k
-              </Text>
+            <View style={styles.gridItemSmall}>
+              <DashboardCard
+                title="Régime Diet"
+                subtitle="Prochain repas"
+                icon="🍽️"
+                backgroundColor="#8B7CF6"
+                style={styles.smallCard}
+                onPress={() => Alert.alert('Diet', 'Navigation vers régime')}
+              >
+                <View style={styles.mealInfo}>
+                  <Text style={styles.mealTime}>3H:</Text>
+                  <Text style={styles.mealDescription}>
+                    Pâtes à la carbonara{'\n'}Blanc de dinde
+                  </Text>
+                </View>
+              </DashboardCard>
             </View>
+          </View>
 
-            <View style={styles.weeklyRow}>
-              <Text style={[styles.weeklyLabel, { color: theme.colors.text.secondary }]}>
-                Pas moyens
-              </Text>
-              <Text style={[styles.weeklyValue, { color: theme.colors.text.primary }]}>
-                8.2k
-              </Text>
+          {/* Deuxième ligne */}
+          <View style={styles.gridRow}>
+            <View style={styles.gridItemSmall}>
+              <DashboardCard
+                title="Générer un programme"
+                icon="✨"
+                backgroundColor="#8B7CF6"
+                style={styles.smallCard}
+                onPress={() => Alert.alert('Générer', 'Génération d\'un nouveau programme')}
+              />
+            </View>
+            <View style={styles.gridItemLarge}>
+              <DashboardCard
+                title="Dashboard"
+                icon="📊"
+                backgroundColor="#8B7CF6"
+                onPress={() => Alert.alert('Stats', 'Navigation vers statistiques')}
+              >
+                <View style={styles.chartContainer}>
+                  <Text style={styles.chartPlaceholder}>📈 sthq</Text>
+                </View>
+              </DashboardCard>
+            </View>
+          </View>
+
+          {/* Troisième ligne */}
+          <View style={styles.gridRow}>
+            <View style={styles.gridItemLarge}>
+              <DashboardCard
+                title="Consulter les Objectifs."
+                icon="🎯"
+                backgroundColor="#F3F4F6"
+                textColor="#1F2937"
+                onPress={() => Alert.alert('Objectifs', 'Navigation vers objectifs')}
+              />
+            </View>
+            <View style={styles.gridItemSmall}>
+              <DashboardCard
+                title="Séries de Progression"
+                icon="⚡"
+                backgroundColor="#8B7CF6"
+                style={styles.smallCard}
+                onPress={() => Alert.alert('Progression', 'Navigation vers progression')}
+              />
             </View>
           </View>
         </View>
+
+        {/* Bottom Cards */}
+        <View style={styles.bottomCards}>
+          <SquircleView
+            style={[styles.bottomCard, { backgroundColor: '#1F2937' }]}
+            squircleParams={{
+              cornerSmoothing: 0.6,
+              cornerRadius: 16,
+              fillColor: '#1F2937',
+            }}
+          >
+            <Text style={styles.bottomCardText}>100 BAKE A CAKE ON STREAM</Text>
+          </SquircleView>
+
+          <SquircleView
+            style={[styles.bottomCard, { backgroundColor: '#1F2937' }]}
+            squircleParams={{
+              cornerSmoothing: 0.6,
+              cornerRadius: 16,
+              fillColor: '#1F2937',
+            }}
+          >
+            <View style={styles.bottomCardContent}>
+              <View style={styles.bottomCardBadge}>
+                <Text style={styles.badgeText}>125</Text>
+              </View>
+              <Text style={styles.bottomCardText}>»</Text>
+              <View style={styles.stars}>
+                <Text>✨</Text>
+              </View>
+            </View>
+          </SquircleView>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -248,94 +238,200 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 100, // Account for tab bar
+    paddingTop: 10,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  greeting: {
-    fontSize: 16,
-    marginBottom: 4,
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  date: {
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#E5E7EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  avatarEmoji: {
+    fontSize: 24,
+  },
+  welcome: {
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    textTransform: 'capitalize',
   },
-  streakBadge: {
+  headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-  },
-  streakText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  quickStatsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 32,
     gap: 12,
   },
-  quickStat: {
-    flex: 1,
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    gap: 8,
   },
-  quickStatNumber: {
+  icon: {
+    fontSize: 18,
+  },
+  challengeCard: {
+    marginBottom: 20,
+    position: 'relative',
+  },
+  challengeActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+  },
+  dismissButton: {
+    position: 'absolute',
+    top: -80,
+    right: 0,
+  },
+  dismissText: {
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  quickStatLabel: {
-    fontSize: 12,
+  doneButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  section: {
-    marginBottom: 32,
+  doneText: {
+    color: '#8B7CF6',
+    fontWeight: 'bold',
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: -40,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1F2937',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  friendsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  friendsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginRight: 12,
+  },
+  friendsList: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  friendAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  friendEmoji: {
+    fontSize: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    marginTop: 8,
   },
-  trackersContainer: {
-    gap: 16,
+  dashboardGrid: {
+    gap: 12,
+    marginBottom: 20,
   },
-  actionsContainer: {
+  gridRow: {
+    flexDirection: 'row',
     gap: 12,
   },
-  actionButton: {
-    padding: 16,
-    borderRadius: 12,
+  gridItemLarge: {
+    flex: 2,
+  },
+  gridItemSmall: {
+    flex: 1,
+  },
+  smallCard: {
+    minHeight: 100,
+  },
+  mealInfo: {
+    marginTop: 8,
+  },
+  mealTime: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  mealDescription: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    opacity: 0.8,
+    marginTop: 4,
+  },
+  chartContainer: {
+    marginTop: 12,
     alignItems: 'center',
   },
-  actionButtonText: {
+  chartPlaceholder: {
     fontSize: 16,
-    fontWeight: '600',
+    color: '#FFFFFF',
   },
-  weeklyCard: {
-    padding: 20,
-    borderRadius: 16,
-    gap: 16,
+  bottomCards: {
+    gap: 12,
   },
-  weeklyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  bottomCard: {
+    padding: 16,
+    minHeight: 60,
+    justifyContent: 'center',
   },
-  weeklyLabel: {
+  bottomCardText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
     fontSize: 14,
   },
-  weeklyValue: {
+  bottomCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bottomCardBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: '600',
+  },
+  stars: {
+    flexDirection: 'row',
   },
 });

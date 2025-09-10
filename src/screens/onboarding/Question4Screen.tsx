@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import RulerPicker from 'react-native-ruler-picker';
+import Ruler from '../../components/ui/Ruler';
 import { OnboardingStackParamList } from '../../types';
 
 type Question4ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question4'>;
@@ -67,20 +67,19 @@ export const Question4Screen: React.FC<Question4ScreenProps> = ({ navigation }) 
                 {selectedHeight} cm
               </Text>
             </View>
-            <RulerPicker
+            <Ruler
               min={140}
               max={220}
               step={1}
-              fractionDigits={0}
               initialValue={selectedHeight}
-              onValueChange={setSelectedHeight}
-              onValueChangeComplete={setSelectedHeight}
-              width={300}
-              height={100}
+              fractionDigits={0}
+              unit="cm"
+              onValueChange={(value) => setSelectedHeight(value)}
+              onValueChangeEnd={(value) => setSelectedHeight(value)}
               indicatorColor={theme.colors.primary}
-              indicatorSize={20}
-              valueTextStyle={{ fontSize: 18, color: theme.colors.text.primary }}
-              unitTextStyle={{ fontSize: 14, color: theme.colors.text.light }}
+              shortTickColor={theme.colors.neutral[300]}
+              longTickColor={theme.colors.neutral[600]}
+              labelColor={theme.colors.text.secondary}
             />
           </View>
         </View>

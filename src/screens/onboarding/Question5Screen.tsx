@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import RulerPicker from 'react-native-ruler-picker';
+import Ruler from '../../components/ui/Ruler';
 import { OnboardingStackParamList } from '../../types';
 
 type Question5ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question5'>;
@@ -73,20 +73,19 @@ export const Question5Screen: React.FC<Question5ScreenProps> = ({ navigation }) 
                 {selectedWeight} kg
               </Text>
             </View>
-            <RulerPicker
+            <Ruler
               min={30}
               max={200}
               step={0.5}
-              fractionDigits={1}
               initialValue={selectedWeight}
-              onValueChange={setSelectedWeight}
-              onValueChangeComplete={setSelectedWeight}
-              width={300}
-              height={100}
+              fractionDigits={1}
+              unit="kg"
+              onValueChange={(value) => setSelectedWeight(value)}
+              onValueChangeEnd={(value) => setSelectedWeight(value)}
               indicatorColor={theme.colors.primary}
-              indicatorSize={20}
-              valueTextStyle={{ fontSize: 18, color: theme.colors.text.primary }}
-              unitTextStyle={{ fontSize: 14, color: theme.colors.text.light }}
+              shortTickColor={theme.colors.neutral[300]}
+              longTickColor={theme.colors.neutral[600]}
+              labelColor={theme.colors.text.secondary}
             />
           </View>
         </View>

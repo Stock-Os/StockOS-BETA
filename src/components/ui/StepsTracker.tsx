@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -166,7 +166,7 @@ export const StepsTracker: React.FC<StepsTrackerProps> = ({
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: theme.colors.primary }]}>
-            {currentSteps.toLocaleString()}
+            {(currentSteps || 0).toLocaleString()}
           </Text>
           <Text style={[styles.statLabel, { color: theme.colors.text.light }]}>
             Actuel
@@ -175,7 +175,7 @@ export const StepsTracker: React.FC<StepsTrackerProps> = ({
         
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: theme.colors.text.secondary }]}>
-            {targetSteps.toLocaleString()}
+            {(targetSteps || 0).toLocaleString()}
           </Text>
           <Text style={[styles.statLabel, { color: theme.colors.text.light }]}>
             Objectif
@@ -206,7 +206,7 @@ export const StepsTracker: React.FC<StepsTrackerProps> = ({
                   }
                 ]}
               >
-                {steps.toLocaleString()}
+                {(steps || 0).toLocaleString()}
               </Text>
             </TouchableOpacity>
           ))}

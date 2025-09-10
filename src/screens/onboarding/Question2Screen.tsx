@@ -36,7 +36,7 @@ export const Question2Screen: React.FC<Question2ScreenProps> = ({ navigation }) 
   const MaleIcon = () => (
     <Svg width={48} height={48} viewBox="0 0 24 24">
       <Path
-        d="M9 9c0-1.66 1.34-3 3-3s3 1.34 3 3 1.34 3 3 3 3 1.34 3 3-1.34 3-3 3H9c-1.66 0-3-1.34-3-3s1.34-3 3-3zm0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5h6c2.76 0 5-2.24 5-5s-2.24-5-5-5H9z"
+        d="M15.5 7.5L19 4h-3V2h6v6h-2V5l-3.5 3.5c1.1 1.2 1.8 2.8 1.8 4.5 0 3.9-3.1 7-7 7s-7-3.1-7-7 3.1-7 7-7c1.7 0 3.3.7 4.5 1.8zM11 9c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z"
         fill={selectedGender === 'male' ? theme.colors.primary : theme.colors.text.light}
       />
     </Svg>
@@ -45,7 +45,7 @@ export const Question2Screen: React.FC<Question2ScreenProps> = ({ navigation }) 
   const FemaleIcon = () => (
     <Svg width={48} height={48} viewBox="0 0 24 24">
       <Path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-1.41-1.41L10 14.17V9h4v5.17l1.41 1.42L14 17h-4z"
+        d="M12 2C8.13 2 5 5.13 5 9c0 3.87 3.13 7 7 7s7-3.13 7-7c0-3.87-3.13-7-7-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zM11 17h2v3h-2v-3zM10 16v1h4v-1h-4z"
         fill={selectedGender === 'female' ? theme.colors.primary : theme.colors.text.light}
       />
     </Svg>

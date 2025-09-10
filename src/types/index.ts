@@ -85,7 +85,10 @@ export type BodyFatLevel =
   | 'normal'
   | 'high'
   | 'very_high'
-  | 'obese';
+  | 'obese'
+  | 'extremely_obese_1'
+  | 'extremely_obese_2'
+  | 'extremely_obese_3';
 
 export type ExperienceLevel = 
   | 'beginner'

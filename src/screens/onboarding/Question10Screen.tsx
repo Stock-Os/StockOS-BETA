@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { InjurySelector } from '../../components/ui/InjurySelector';
+import { InjurySelector, BodyMuscle } from '../../components/ui/InjurySelector';
 import { OnboardingStackParamList } from '../../types';
 
 type Question10ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question10'>;
@@ -21,12 +21,12 @@ interface Question10ScreenProps {
 
 export const Question10Screen: React.FC<Question10ScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
-  const { updateOnboardingData } = useUserData();
+  const { updateOnboardingData, state } = useUserData();
   
-  const [selectedInjuries, setSelectedInjuries] = useState<string[]>([]);
+  const [selectedMuscles, setSelectedMuscles] = useState<BodyMuscle[]>([]);
 
   const handleNext = () => {
-    updateOnboardingData({ injuries: selectedInjuries });
+    updateOnboardingData({ injuries: selectedMuscles });
     navigation.navigate('Question11');
   };
 
@@ -63,21 +63,17 @@ export const Question10Screen: React.FC<Question10ScreenProps> = ({ navigation }
 
           <View style={styles.selectorContainer}>
             <InjurySelector
-              selectedInjuries={selectedInjuries}
-              onSelectionChange={setSelectedInjuries}
+              selectedMuscles={selectedMuscles}
+              onMuscleToggle={(muscle) => {
+                if (selectedMuscles.includes(muscle)) {
+                  setSelectedMuscles(selectedMuscles.filter(m => m !== muscle));
+                } else {
+                  setSelectedMuscles([...selectedMuscles, muscle]);
+                }
+              }}
+              gender={state.onboardingData?.gender === 'female' ? 'female' : 'male'}
             />
           </View>
-
-          {selectedInjuries.length > 0 && (
-            <View style={styles.selectedContainer}>
-              <Text style={[styles.selectedTitle, { color: theme.colors.text.primary }]}>
-                Zones sélectionnées:
-              </Text>
-              <Text style={[styles.selectedList, { color: theme.colors.primary }]}>
-                {selectedInjuries.join(', ')}
-              </Text>
-            </View>
-          )}
         </View>
 
         <View style={styles.footer}>

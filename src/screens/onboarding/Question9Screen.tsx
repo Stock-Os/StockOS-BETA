@@ -11,7 +11,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
 import { BodyFatSelector } from '../../components/ui/BodyFatSelector';
-import { OnboardingStackParamList } from '../../types';
+import { OnboardingStackParamList, BodyFatLevel } from '../../types';
 
 type Question9ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question9'>;
 
@@ -23,10 +23,25 @@ export const Question9Screen: React.FC<Question9ScreenProps> = ({ navigation }) 
   const { theme } = useTheme();
   const { updateOnboardingData, onboardingData } = useUserData();
   
-  const [selectedBodyFat, setSelectedBodyFat] = useState<number>(15);
+  const [selectedBodyFat, setSelectedBodyFat] = useState<BodyFatLevel>('normal');
+
+  const getBodyFatPercentage = (level: BodyFatLevel): number => {
+    const mappings: Record<BodyFatLevel, number> = {
+      'very_low': 4,
+      'low': 6,
+      'normal': 10,
+      'high': 15,
+      'very_high': 20,
+      'obese': 27,
+      'extremely_obese_1': 32,
+      'extremely_obese_2': 37,
+      'extremely_obese_3': 42,
+    };
+    return mappings[level];
+  };
 
   const handleNext = () => {
-    updateOnboardingData({ bodyFatPercentage: selectedBodyFat });
+    updateOnboardingData({ bodyFatPercentage: getBodyFatPercentage(selectedBodyFat) });
     navigation.navigate('Question10');
   };
 
@@ -64,14 +79,14 @@ export const Question9Screen: React.FC<Question9ScreenProps> = ({ navigation }) 
           <View style={styles.selectorContainer}>
             <BodyFatSelector
               gender={onboardingData?.gender || 'male'}
-              selectedValue={selectedBodyFat}
-              onSelectionChange={setSelectedBodyFat}
+              selectedLevel={selectedBodyFat}
+              onLevelChange={setSelectedBodyFat}
             />
           </View>
 
           <View style={styles.infoContainer}>
             <Text style={[styles.infoText, { color: theme.colors.text.secondary }]}>
-              Pourcentage sélectionné: {selectedBodyFat}%
+              Pourcentage sélectionné: {getBodyFatPercentage(selectedBodyFat)}%
             </Text>
           </View>
         </View>

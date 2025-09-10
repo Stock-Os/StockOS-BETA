@@ -14,34 +14,32 @@ import { Button } from '../../components/ui/Button';
 import { BackButton } from '../../components/ui/BackButton';
 import { OnboardingStackParamList } from '../../types';
 
-type Question3ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question3'>;
+type Question20ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question20'>;
 
-interface Question3ScreenProps {
-  navigation: Question3ScreenNavigationProp;
+interface Question20ScreenProps {
+  navigation: Question20ScreenNavigationProp;
 }
 
-export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) => {
+export const Question20Screen: React.FC<Question20ScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
   const { updateOnboardingData } = useUserData();
   
-  const [selectedAge, setSelectedAge] = useState<number | null>(null);
+  const [selectedSleepHours, setSelectedSleepHours] = useState<string>('');
 
-  // Age ranges
-  const ageRanges = [
-    { id: 16, label: '14-17 ans', min: 14, max: 17 },
-    { id: 20, label: '18-22 ans', min: 18, max: 22 },
-    { id: 27, label: '23-30 ans', min: 23, max: 30 },
-    { id: 37, label: '31-40 ans', min: 31, max: 40 },
-    { id: 47, label: '41-50 ans', min: 41, max: 50 },
-    { id: 57, label: '51-60 ans', min: 51, max: 60 },
-    { id: 67, label: '61-70 ans', min: 61, max: 70 },
-    { id: 75, label: '71+ ans', min: 71, max: 80 },
+  const sleepOptions = [
+    { id: 'less_than_5', label: 'Moins de 5h', description: 'Sommeil insuffisant' },
+    { id: '5_to_6', label: '5-6h', description: 'Sommeil court' },
+    { id: '6_to_7', label: '6-7h', description: 'Sommeil modéré' },
+    { id: '7_to_8', label: '7-8h', description: 'Sommeil recommandé' },
+    { id: '8_to_9', label: '8-9h', description: 'Sommeil long' },
+    { id: 'more_than_9', label: 'Plus de 9h', description: 'Sommeil très long' },
   ];
 
   const handleNext = () => {
-    if (!selectedAge) return;
-    updateOnboardingData({ age: selectedAge });
-    navigation.navigate('Question4');
+    if (!selectedSleepHours) return;
+    
+    updateOnboardingData({ sleepHours: selectedSleepHours });
+    navigation.navigate('Question21');
   };
 
   const handleBack = () => {
@@ -52,9 +50,7 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <View style={styles.backButtonContainer}>
-            <BackButton onPress={handleBack} />
-          </View>
+          <BackButton onPress={handleBack} />
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { backgroundColor: theme.colors.neutral[200] }]}>
               <View 
@@ -62,49 +58,54 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
                   styles.progress, 
                   { 
                     backgroundColor: theme.colors.primary,
-                    width: `${(3/26) * 100}%` 
+                    width: `${(20/26) * 100}%` 
                   }
                 ]} 
               />
             </View>
             <Text style={[styles.progressText, { color: theme.colors.text.light }]}>
-              3 / 26
+              20 / 26
             </Text>
           </View>
         </View>
 
         <View style={styles.content}>
           <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-            Quel âge avez-vous ?
+            Combien d'heures dormez-vous par nuit ?
           </Text>
           
           <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
-            Votre âge nous aide à adapter l'intensité de vos programmes
+            Le sommeil est crucial pour la récupération et les performances
           </Text>
 
           <View style={styles.optionsContainer}>
-            {ageRanges.map((range) => (
+            {sleepOptions.map((option) => (
               <TouchableOpacity
-                key={range.id}
+                key={option.id}
                 style={[
                   styles.option,
                   {
-                    borderColor: selectedAge === range.id ? theme.colors.primary : theme.colors.neutral[300],
-                    backgroundColor: selectedAge === range.id ? theme.colors.primary + '10' : theme.colors.surface,
+                    borderColor: selectedSleepHours === option.id ? theme.colors.primary : theme.colors.neutral[300],
+                    backgroundColor: selectedSleepHours === option.id ? theme.colors.primary + '10' : theme.colors.surface,
                   }
                 ]}
-                onPress={() => setSelectedAge(range.id)}
+                onPress={() => setSelectedSleepHours(option.id)}
               >
-                <Text style={[
-                  styles.optionText,
-                  {
-                    color: selectedAge === range.id ? theme.colors.primary : theme.colors.text.primary,
-                    fontWeight: selectedAge === range.id ? '600' : '500',
-                  }
-                ]}>
-                  {range.label}
-                </Text>
-                {selectedAge === range.id && (
+                <View style={styles.optionContent}>
+                  <Text style={[
+                    styles.optionLabel,
+                    {
+                      color: selectedSleepHours === option.id ? theme.colors.primary : theme.colors.text.primary,
+                      fontWeight: selectedSleepHours === option.id ? '600' : '500',
+                    }
+                  ]}>
+                    {option.label}
+                  </Text>
+                  <Text style={[styles.optionDescription, { color: theme.colors.text.light }]}>
+                    {option.description}
+                  </Text>
+                </View>
+                {selectedSleepHours === option.id && (
                   <Text style={[styles.checkmark, { color: theme.colors.primary }]}>✓</Text>
                 )}
               </TouchableOpacity>
@@ -116,7 +117,7 @@ export const Question3Screen: React.FC<Question3ScreenProps> = ({ navigation }) 
           <Button
             title="Continuer"
             onPress={handleNext}
-            disabled={!selectedAge}
+            disabled={!selectedSleepHours}
             fullWidth
           />
         </View>
@@ -138,12 +139,9 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 40,
   },
-  backButtonContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
   progressContainer: {
     alignItems: 'center',
+    marginTop: 20,
   },
   progressBar: {
     width: '100%',
@@ -161,7 +159,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
@@ -174,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 48,
+    marginBottom: 32,
   },
   optionsContainer: {
     gap: 12,
@@ -182,13 +179,20 @@ const styles = StyleSheet.create({
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 16,
     borderWidth: 2,
     borderRadius: 12,
   },
-  optionText: {
+  optionContent: {
+    flex: 1,
+  },
+  optionLabel: {
     fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  optionDescription: {
+    fontSize: 14,
   },
   checkmark: {
     fontSize: 20,

@@ -56,10 +56,10 @@ export const Question26Screen: React.FC<Question26ScreenProps> = ({ navigation }
         [
           {
             text: 'Commencer',
-            onPress: () => navigation.reset({
-              index: 0,
-              routes: [{ name: 'MainTabs' as any }],
-            }),
+            onPress: () => {
+              // L'onboarding est terminé, AppNavigator redirigera automatiquement
+              // vers MainNavigator grâce à isOnboardingComplete
+            },
           }
         ]
       );

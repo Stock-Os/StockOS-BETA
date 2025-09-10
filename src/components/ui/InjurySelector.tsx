@@ -1,110 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Body from 'react-native-body-highlighter';
 import { useTheme } from '../../contexts/ThemeContext';
-import { InjuryZone } from '../../types';
+
+// Type pour les muscles individuels
+export type BodyMuscle = 'head' | 'neck' | 'deltoids' | 'trapezius' | 'biceps' | 'triceps' | 'forearm' | 'hands' | 
+                         'chest' | 'abs' | 'obliques' | 'upper-back' | 'lower-back' | 'gluteal' | 'adductors' | 
+                         'hamstring' | 'calves' | 'tibialis' | 'feet' | 'ankles';
 
 interface InjurySelectorProps {
-  selectedZones: InjuryZone[];
-  onZoneToggle: (zone: InjuryZone) => void;
+  selectedMuscles: BodyMuscle[];
+  onMuscleToggle: (muscle: BodyMuscle) => void;
   gender?: 'male' | 'female';
 }
 
-const { width: screenWidth } = Dimensions.get('window');
-const mannequinWidth = screenWidth * 0.8;
-const mannequinHeight = mannequinWidth * 1.5;
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const InjurySelector: React.FC<InjurySelectorProps> = ({
-  selectedZones,
-  onZoneToggle,
+  selectedMuscles,
+  onMuscleToggle,
   gender = 'male',
 }) => {
   const { theme } = useTheme();
+  const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
 
-  const bodyParts = [
-    { zone: 'neck' as InjuryZone, cx: mannequinWidth * 0.5, cy: mannequinHeight * 0.15, r: 20 },
-    { zone: 'shoulder' as InjuryZone, cx: mannequinWidth * 0.3, cy: mannequinHeight * 0.22, r: 25 },
-    { zone: 'shoulder' as InjuryZone, cx: mannequinWidth * 0.7, cy: mannequinHeight * 0.22, r: 25 },
-    { zone: 'back' as InjuryZone, cx: mannequinWidth * 0.5, cy: mannequinHeight * 0.35, r: 40 },
-    { zone: 'elbow' as InjuryZone, cx: mannequinWidth * 0.25, cy: mannequinHeight * 0.4, r: 15 },
-    { zone: 'elbow' as InjuryZone, cx: mannequinWidth * 0.75, cy: mannequinHeight * 0.4, r: 15 },
-    { zone: 'wrist' as InjuryZone, cx: mannequinWidth * 0.2, cy: mannequinHeight * 0.55, r: 12 },
-    { zone: 'wrist' as InjuryZone, cx: mannequinWidth * 0.8, cy: mannequinHeight * 0.55, r: 12 },
-    { zone: 'hip' as InjuryZone, cx: mannequinWidth * 0.5, cy: mannequinHeight * 0.6, r: 30 },
-    { zone: 'knee' as InjuryZone, cx: mannequinWidth * 0.4, cy: mannequinHeight * 0.8, r: 20 },
-    { zone: 'knee' as InjuryZone, cx: mannequinWidth * 0.6, cy: mannequinHeight * 0.8, r: 20 },
-    { zone: 'ankle' as InjuryZone, cx: mannequinWidth * 0.4, cy: mannequinHeight * 0.95, r: 15 },
-    { zone: 'ankle' as InjuryZone, cx: mannequinWidth * 0.6, cy: mannequinHeight * 0.95, r: 15 },
-  ];
-
-  const isZoneSelected = (zone: InjuryZone) => selectedZones.includes(zone);
-
-  const handleZonePress = (zone: InjuryZone) => {
-    onZoneToggle(zone);
+  // Convert selected muscles to body part data for the highlighter
+  const getSelectedBodyParts = () => {
+    return selectedMuscles.map(muscle => ({
+      slug: muscle,
+      intensity: 2
+    }));
   };
 
-  const renderBodyOutline = () => {
-    const pathData = `
-      M ${mannequinWidth * 0.5} ${mannequinHeight * 0.08}
-      C ${mannequinWidth * 0.4} ${mannequinHeight * 0.08} ${mannequinWidth * 0.35} ${mannequinHeight * 0.12} ${mannequinWidth * 0.35} ${mannequinHeight * 0.18}
-      L ${mannequinWidth * 0.2} ${mannequinHeight * 0.25}
-      L ${mannequinWidth * 0.15} ${mannequinHeight * 0.6}
-      L ${mannequinWidth * 0.35} ${mannequinHeight * 0.65}
-      L ${mannequinWidth * 0.35} ${mannequinHeight * 1.0}
-      L ${mannequinWidth * 0.45} ${mannequinHeight * 1.0}
-      L ${mannequinWidth * 0.45} ${mannequinHeight * 0.65}
-      L ${mannequinWidth * 0.55} ${mannequinHeight * 0.65}
-      L ${mannequinWidth * 0.55} ${mannequinHeight * 1.0}
-      L ${mannequinWidth * 0.65} ${mannequinHeight * 1.0}
-      L ${mannequinWidth * 0.65} ${mannequinHeight * 0.65}
-      L ${mannequinWidth * 0.85} ${mannequinHeight * 0.6}
-      L ${mannequinWidth * 0.8} ${mannequinHeight * 0.25}
-      L ${mannequinWidth * 0.65} ${mannequinHeight * 0.18}
-      C ${mannequinWidth * 0.65} ${mannequinHeight * 0.12} ${mannequinWidth * 0.6} ${mannequinHeight * 0.08} ${mannequinWidth * 0.5} ${mannequinHeight * 0.08}
-      Z
-    `;
-
-    return (
-      <Path
-        d={pathData}
-        fill="none"
-        stroke={theme.colors.neutral[400]}
-        strokeWidth="2"
-      />
-    );
+  const handleBodyPartPress = (bodyPart: { slug: string, intensity: number }) => {
+    console.log('BodyPart pressed:', bodyPart.slug); // Debug log
+    const muscle = bodyPart.slug as BodyMuscle;
+    onMuscleToggle(muscle);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.mannequinContainer}>
-        <Svg
-          width={mannequinWidth}
-          height={mannequinHeight}
-          viewBox={`0 0 ${mannequinWidth} ${mannequinHeight}`}
+        <Body
+          data={getSelectedBodyParts()}
+          onBodyPartPress={handleBodyPartPress}
+          colors={[
+            theme.colors.semantic.error || '#ff7675',
+            '#d63031'
+          ]}
+          side={viewSide}
+          gender={gender}
+          scale={1.3}
+        />
+        
+        <TouchableOpacity
+          style={[styles.toggleButton, { backgroundColor: theme.colors.primary }]}
+          onPress={() => setViewSide(viewSide === 'front' ? 'back' : 'front')}
         >
-          {renderBodyOutline()}
-          
-          {bodyParts.map((part, index) => (
-            <Circle
-              key={`${part.zone}-${index}`}
-              cx={part.cx}
-              cy={part.cy}
-              r={part.r}
-              fill={
-                isZoneSelected(part.zone)
-                  ? theme.colors.semantic.error + '80'
-                  : 'transparent'
-              }
-              stroke={
-                isZoneSelected(part.zone)
-                  ? theme.colors.semantic.error
-                  : theme.colors.neutral[400]
-              }
-              strokeWidth="2"
-              onPress={() => handleZonePress(part.zone)}
-            />
-          ))}
-        </Svg>
+          <Text style={[styles.toggleText, { color: '#FFFFFF' }]}>
+            {viewSide === 'front' ? '🔄 Dos' : '🔄 Face'}
+          </Text>
+        </TouchableOpacity>
       </View>
       
       <View style={styles.legend}>
@@ -113,17 +69,17 @@ export const InjurySelector: React.FC<InjurySelectorProps> = ({
         </Text>
         
         <View style={styles.selectedZones}>
-          {selectedZones.map((zone, index) => (
+          {selectedMuscles.map((muscle, index) => (
             <TouchableOpacity
-              key={`selected-${zone}-${index}`}
-              onPress={() => handleZonePress(zone)}
+              key={`selected-${muscle}-${index}`}
+              onPress={() => onMuscleToggle(muscle)}
               style={[
                 styles.selectedZoneChip,
                 { backgroundColor: theme.colors.semantic.error + '20', borderColor: theme.colors.semantic.error }
               ]}
             >
               <Text style={[styles.selectedZoneText, { color: theme.colors.semantic.error }]}>
-                {getZoneLabel(zone)}
+                {getMuscleLabel(muscle)}
               </Text>
               <Text style={[styles.removeIcon, { color: theme.colors.semantic.error }]}>×</Text>
             </TouchableOpacity>
@@ -134,30 +90,71 @@ export const InjurySelector: React.FC<InjurySelectorProps> = ({
   );
 };
 
-const getZoneLabel = (zone: InjuryZone): string => {
-  const labels: Record<InjuryZone, string> = {
-    neck: 'Cou',
-    shoulder: 'Épaule',
-    back: 'Dos',
-    elbow: 'Coude',
-    wrist: 'Poignet',
-    hip: 'Hanche',
-    knee: 'Genou',
-    ankle: 'Cheville',
-    other: 'Autre',
+const getMuscleLabel = (muscle: BodyMuscle): string => {
+  const labels: Record<BodyMuscle, string> = {
+    // Tête et cou
+    'head': 'Tête',
+    'neck': 'Cou',
+    
+    // Épaules et bras
+    'deltoids': 'Deltoïdes',
+    'trapezius': 'Trapèzes',
+    'biceps': 'Biceps',
+    'triceps': 'Triceps',
+    'forearm': 'Avant-bras',
+    'hands': 'Mains',
+    
+    // Torse
+    'chest': 'Pectoraux',
+    'abs': 'Abdominaux',
+    'obliques': 'Obliques',
+    'upper-back': 'Haut du dos',
+    'lower-back': 'Bas du dos',
+    
+    // Hanches et jambes
+    'gluteal': 'Fessiers',
+    'adductors': 'Adducteurs',
+    'hamstring': 'Ischio-jambiers',
+    'calves': 'Mollets',
+    'tibialis': 'Tibias',
+    'feet': 'Pieds',
+    'ankles': 'Chevilles',
   };
   
-  return labels[zone] || zone;
+  return labels[muscle] || muscle;
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   mannequinContainer: {
+    flex: 1,
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'center',
+    marginBottom: 20,
+    position: 'relative',
+    minHeight: Dimensions.get('window').height * 0.5,
+    width: Dimensions.get('window').width,
+  },
+  toggleButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  toggleText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   legend: {
     alignItems: 'center',

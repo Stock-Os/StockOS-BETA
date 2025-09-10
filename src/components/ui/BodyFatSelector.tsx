@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions, Image } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 import { useTheme } from '../../contexts/ThemeContext';
 import { BodyFatLevel } from '../../types';
 
 interface BodyFatOption {
   level: BodyFatLevel;
-  label: string;
-  maleImage: string;
-  femaleImage: string;
   percentage: string;
+  svgFile: string;
+  description: string;
 }
 
 interface BodyFatSelectorProps {
@@ -18,7 +18,20 @@ interface BodyFatSelectorProps {
 }
 
 const { width: screenWidth } = Dimensions.get('window');
-const itemWidth = (screenWidth - 48) / 3; // 3 columns with padding
+const itemWidth = (screenWidth - 80) / 3; // 3 columns with padding
+
+// Import your SVG assets
+const bodyfatAssets: Record<string, any> = {
+  '3-4': require('../../../assets/bodyfat/3-4.svg'),
+  '5-7': require('../../../assets/bodyfat/5-7.svg'),
+  '8-12': require('../../../assets/bodyfat/8-12.svg'),
+  '13-17': require('../../../assets/bodyfat/13-17.svg'),
+  '18-23': require('../../../assets/bodyfat/18-23.svg'),
+  '24-29': require('../../../assets/bodyfat/24-29.svg'),
+  '30-34': require('../../../assets/bodyfat/30-34.svg'),
+  '35-39': require('../../../assets/bodyfat/35-39.svg'),
+  '40plus': require('../../../assets/bodyfat/40plus.svg'),
+};
 
 export const BodyFatSelector: React.FC<BodyFatSelectorProps> = ({
   selectedLevel,
@@ -30,47 +43,60 @@ export const BodyFatSelector: React.FC<BodyFatSelectorProps> = ({
   const bodyFatOptions: BodyFatOption[] = [
     {
       level: 'very_low',
-      label: 'Très bas',
-      maleImage: '👨‍💪',
-      femaleImage: '👩‍💪',
-      percentage: '< 10%',
+      percentage: '3-4%',
+      svgFile: '3-4',
+      description: 'Très athlétique',
     },
     {
       level: 'low',
-      label: 'Bas',
-      maleImage: '🧑‍💼',
-      femaleImage: '👩‍💼',
-      percentage: '10-15%',
+      percentage: '5-7%',
+      svgFile: '5-7',
+      description: 'Athlétique',
     },
     {
       level: 'normal',
-      label: 'Normal',
-      maleImage: '🧑',
-      femaleImage: '👩',
-      percentage: '15-20%',
+      percentage: '8-12%',
+      svgFile: '8-12',
+      description: 'En forme',
     },
     {
       level: 'high',
-      label: 'Élevé',
-      maleImage: '🧑‍🍳',
-      femaleImage: '👩‍🍳',
-      percentage: '20-25%',
+      percentage: '13-17%',
+      svgFile: '13-17',
+      description: 'Moyen',
     },
     {
       level: 'very_high',
-      label: 'Très élevé',
-      maleImage: '👨‍🎨',
-      femaleImage: '👩‍🎨',
-      percentage: '25-30%',
+      percentage: '18-23%',
+      svgFile: '18-23',
+      description: 'Élevé',
     },
     {
       level: 'obese',
-      label: 'Obèse',
-      maleImage: '🧑‍🎤',
-      femaleImage: '👩‍🎤',
-      percentage: '> 30%',
+      percentage: '24-29%',
+      svgFile: '24-29',
+      description: 'Obèse I',
+    },
+    {
+      level: 'extremely_obese_1',
+      percentage: '30-34%',
+      svgFile: '30-34',
+      description: 'Obèse II',
+    },
+    {
+      level: 'extremely_obese_2',
+      percentage: '35-39%',
+      svgFile: '35-39',
+      description: 'Obèse III',
+    },
+    {
+      level: 'extremely_obese_3',
+      percentage: '40%+',
+      svgFile: '40plus',
+      description: 'Très obèse',
     },
   ];
+
 
   const renderOption = (option: BodyFatOption, index: number) => {
     const isSelected = selectedLevel === option.level;
@@ -84,42 +110,55 @@ export const BodyFatSelector: React.FC<BodyFatSelectorProps> = ({
           styles.option,
           {
             width: itemWidth,
-            backgroundColor: isSelected ? theme.colors.primary + '20' : theme.colors.surface,
-            borderColor: isSelected ? theme.colors.primary : theme.colors.neutral[300],
-            borderWidth: isSelected ? 2 : 1,
-            marginRight: isThirdColumn ? 0 : 8,
+            marginRight: isThirdColumn ? 0 : 12,
+            marginBottom: 16,
           }
         ]}
         activeOpacity={0.7}
       >
-        <View style={styles.imageContainer}>
-          <Text style={styles.bodyImage}>
-            {gender === 'male' ? option.maleImage : option.femaleImage}
-          </Text>
+        <View style={[
+          styles.circleContainer,
+          {
+            borderWidth: isSelected ? 3 : 1,
+            borderColor: isSelected ? theme.colors.primary || '#007AFF' : '#555555',
+            backgroundColor: isSelected ? 'rgba(0, 122, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+          }
+        ]}>
+          <Image
+            source={bodyfatAssets[option.svgFile]}
+            style={[
+              styles.svgImage,
+              {
+                width: itemWidth * 0.7,
+                height: itemWidth * 0.7,
+                opacity: 1,
+              }
+            ]}
+            resizeMode="contain"
+          />
         </View>
         
         <Text
           style={[
             styles.percentage,
             {
-              color: isSelected ? theme.colors.primary : theme.colors.text.secondary,
-              fontWeight: isSelected ? theme.fontWeight.bold : theme.fontWeight.medium,
+              color: theme.colors.text.primary || '#FFFFFF',
+              fontWeight: isSelected ? '700' : '500',
             }
           ]}
         >
           {option.percentage}
         </Text>
-        
         <Text
           style={[
-            styles.label,
+            styles.description,
             {
-              color: isSelected ? theme.colors.primary : theme.colors.text.light,
-              fontWeight: isSelected ? theme.fontWeight.semibold : theme.fontWeight.normal,
+              color: theme.colors.text.secondary || '#AAAAAA',
+              fontWeight: isSelected ? '600' : '400',
             }
           ]}
         >
-          {option.label}
+          {option.description}
         </Text>
       </TouchableOpacity>
     );
@@ -136,34 +175,46 @@ export const BodyFatSelector: React.FC<BodyFatSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   option: {
-    padding: 16,
-    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 12,
-    minHeight: 120,
   },
-  imageContainer: {
-    marginBottom: 8,
+  circleContainer: {
+    width: itemWidth,
+    height: itemWidth,
+    borderRadius: itemWidth / 2,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  bodyImage: {
-    fontSize: 32,
+  svgImage: {
+    zIndex: 10,
+    elevation: 10,
+  },
+  loadingPlaceholder: {
+    borderRadius: 8,
   },
   percentage: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  label: {
     fontSize: 12,
+    fontWeight: '500',
     textAlign: 'center',
+    marginTop: 4,
+  },
+  description: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 2,
   },
 });

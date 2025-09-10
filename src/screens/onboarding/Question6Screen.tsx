@@ -10,7 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { Button } from '../../components/ui/Button';
-import { WheelPicker } from '../../components/ui/WheelPicker';
+import Ruler from '../../components/ui/Ruler';
 import { OnboardingStackParamList } from '../../types';
 
 type Question6ScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Question6'>;
@@ -24,12 +24,6 @@ export const Question6Screen: React.FC<Question6ScreenProps> = ({ navigation }) 
   const { updateOnboardingData } = useUserData();
   
   const [selectedWeight, setSelectedWeight] = useState(70);
-
-  // Generate weight options from 40kg to 150kg
-  const weightOptions = Array.from({ length: 111 }, (_, index) => ({
-    value: index + 40,
-    label: `${index + 40} kg`,
-  }));
 
   const handleNext = () => {
     updateOnboardingData({ targetWeight: selectedWeight });
@@ -68,12 +62,24 @@ export const Question6Screen: React.FC<Question6ScreenProps> = ({ navigation }) 
           </Text>
 
           <View style={styles.pickerContainer}>
-            <WheelPicker
-              data={weightOptions}
-              selectedValue={selectedWeight}
-              onSelectionChange={setSelectedWeight}
-              itemHeight={60}
-              visibleItems={5}
+            <View style={styles.weightDisplay}>
+              <Text style={[styles.weightValue, { color: theme.colors.primary }]}>
+                {selectedWeight} kg
+              </Text>
+            </View>
+            <Ruler
+              min={40}
+              max={150}
+              step={0.5}
+              initialValue={selectedWeight}
+              fractionDigits={1}
+              unit="kg"
+              onValueChange={(value) => setSelectedWeight(value)}
+              onValueChangeEnd={(value) => setSelectedWeight(value)}
+              indicatorColor={theme.colors.primary}
+              shortTickColor={theme.colors.neutral[300]}
+              longTickColor={theme.colors.neutral[600]}
+              labelColor={theme.colors.text.secondary}
             />
           </View>
         </View>
@@ -138,8 +144,18 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   pickerContainer: {
-    height: 300,
+    height: 200,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  weightDisplay: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  weightValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
   },
   footer: {
     paddingTop: 20,
