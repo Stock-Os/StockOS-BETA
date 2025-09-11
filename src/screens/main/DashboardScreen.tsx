@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,432 +6,392 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Dimensions,
+  Image,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { SemaineWidget } from '../../components/ui/SemaineWidget';
-import { DashboardCard } from '../../components/ui/DashboardCard';
-import { SquircleView } from 'expo-squircle-view';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+const W = screenWidth - 40; // Largeur pleine écran avec marges
+
+// Fonction pour obtenir les jours de la semaine
+const getDaysOfWeek = () => {
+  const today = new Date();
+  const weekDays = [];
+  
+  // Créer 7 jours avec aujourd'hui au centre (position 3)
+  for (let i = -3; i <= 3; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayIndex = date.getDay();
+    const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // Dimanche = 6, Lundi = 0
+    weekDays.push({
+      dayName: ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'][adjustedIndex],
+      dayNumber: date.getDate(),
+      isToday: date.toDateString() === today.toDateString()
+    });
+  }
+  
+  return weekDays;
+};
 
 export const DashboardScreen: React.FC = () => {
   const { theme } = useTheme();
   const { userData } = useUserData();
-  const { user } = useAuth();
+  const [currentPage, setCurrentPage] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const weekDays = getDaysOfWeek();
 
-  // Friends avatars data
-  const friends = [
-    { id: 1, avatar: '👦🏽', color: '#F59E0B' },
-    { id: 2, avatar: '👨🏿', color: '#10B981' },
-    { id: 3, avatar: '👨🏼', color: '#F59E0B' },
-    { id: 4, avatar: '👩🏼', color: '#6B7280' },
-    { id: 5, avatar: '👩🏻', color: '#EF4444' },
-  ];
+  // État pour les progressions
+  const [waterProgress, setWaterProgress] = useState(23); // 23% comme dans l'image
+  const [streakProgress, setStreakProgress] = useState(15); // Exemple
 
-  // Week days data
-  const weekDays = [
-    { day: 'SAM', date: 7, isToday: true },
-    { day: 'DIM', date: 7 },
-    { day: 'LUN', date: 8 },
-    { day: 'MAR', date: 9 },
-    { day: 'MER', date: 10 },
-    { day: 'JEU', date: 11 },
-    { day: 'VEN', date: 12 },
-  ];
+  // Fonction pour simuler la progression quand on accomplit une tâche
+  const completeTask = () => {
+    setWaterProgress(prev => Math.min(prev + 5, 100)); // +5% pour l'eau
+    Alert.alert('Objectif accompli!', `Progression eau: ${Math.min(waterProgress + 5, 100)}%`);
+  };
+
+  const renderWeekDaysOverlay = () => {
+    const sectionHeight = (screenWidth - 40) * (435.91 / 1099.06);
+    const dayWidth = (screenWidth - 40) * 0.13;
+    const startX = (screenWidth - 40) * 0.095;
+    const dayY = sectionHeight * 0.65;
+    
+    return (
+      <View style={[styles.weekOverlay, { height: sectionHeight }]}>
+        {weekDays.map((day, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dayContainer,
+              {
+                left: startX + (index * dayWidth),
+                top: dayY,
+                width: dayWidth,
+              }
+            ]}
+          >
+            <Text style={[
+              styles.dayText,
+              day.isToday && styles.todayDayText
+            ]}>
+              {day.dayName}
+            </Text>
+            <Text style={[
+              styles.dayNumber,
+              day.isToday && styles.todayDayNumber
+            ]}>
+              {day.dayNumber}
+            </Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const getProgressBarSource = (progress: number) => {
+    if (progress <= 5) return require('../../../assets/ui/Widget/Progressbar_0-5%.png');
+    if (progress <= 10) return require('../../../assets/ui/Widget/Progressbar_5-10%.png');
+    if (progress <= 15) return require('../../../assets/ui/Widget/Progressbar 10-15%.png');
+    if (progress <= 20) return require('../../../assets/ui/Widget/Progressbar 15-20%.png');
+    if (progress <= 25) return require('../../../assets/ui/Widget/Progressbar 20-25%.png');
+    if (progress <= 30) return require('../../../assets/ui/Widget/Progressbar 25-30%.png');
+    if (progress <= 35) return require('../../../assets/ui/Widget/Progressbar 30-35%.png');
+    if (progress <= 40) return require('../../../assets/ui/Widget/Progressbar 35-40%.png');
+    if (progress <= 45) return require('../../../assets/ui/Widget/Progressbar 40-45%.png');
+    if (progress <= 50) return require('../../../assets/ui/Widget/Progressbar 45-50%.png');
+    if (progress <= 55) return require('../../../assets/ui/Widget/Progressbar 50-55%.png');
+    if (progress <= 60) return require('../../../assets/ui/Widget/Progressbar 55-60%.png');
+    if (progress <= 65) return require('../../../assets/ui/Widget/Progressbar 60-65%.png');
+    if (progress <= 70) return require('../../../assets/ui/Widget/Progressbar 65-70%.png');
+    if (progress <= 75) return require('../../../assets/ui/Widget/Progressbar 70-75%.png');
+    if (progress <= 80) return require('../../../assets/ui/Widget/Progressbar 75-80%.png');
+    if (progress <= 85) return require('../../../assets/ui/Widget/Progressbar 80-85%.png');
+    if (progress <= 90) return require('../../../assets/ui/Widget/Progressbar 85-90%.png');
+    if (progress <= 95) return require('../../../assets/ui/Widget/Progressbar 85-90%_1.png');
+    return require('../../../assets/ui/Widget/Progressbar 95-100%.png');
+  };
+
+  const renderLevelProgress = () => {
+    return (
+      <View style={styles.levelContainer}>
+        <Image 
+          source={require('../../../assets/ui/Nutrition/Level_Progress.png')}
+          style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+          resizeMode="contain"
+        />
+        <View style={styles.progressOverlay}>
+          <Image 
+            source={getProgressBarSource(waterProgress)}
+            style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+    );
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    scrollViewRef.current?.scrollTo({
+      x: page * screenWidth,
+      animated: true,
+    });
+  };
+
+  const renderPageIndicator = () => (
+    <View style={styles.pageIndicator}>
+      {[0, 1].map((page) => (
+        <TouchableOpacity
+          key={page}
+          style={[
+            styles.dot,
+            {
+              backgroundColor: currentPage === page ? '#1f2233' : '#414460',
+            }
+          ]}
+          onPress={() => handlePageChange(page)}
+        />
+      ))}
+    </View>
+  );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScrollView 
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(event) => {
+          const page = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+          setCurrentPage(page);
+        }}
+        contentContainerStyle={styles.horizontalScrollContent}
+      >
+        {/* Page 1 - PROGRAMME */}
+        <View style={styles.pageContainer}>
+          <View style={styles.pageContent}>
+            {/* Widget Semaine */}
+            <TouchableOpacity style={styles.topWidget}>
+              <View style={styles.semaineContainer}>
+                <Image 
+                  source={require('../../../assets/ui/Programme/Section_Semaine.png')}
+                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+                  resizeMode="contain"
+                />
+                {renderWeekDaysOverlay()}
+              </View>
+            </TouchableOpacity>
+
+            {/* Button Générer le programme */}
+            <Pressable
+              style={styles.middleButton}
+              onPress={() => Alert.alert('Génération', 'Génération du programme en cours...')}
+            >
+              {({ pressed }) => (
+                <Image 
+                  source={pressed 
+                    ? require('../../../assets/ui/Programme/Button_ProgrammeAI_press.png')
+                    : require('../../../assets/ui/Programme/Button_ProgrammeAI.png')
+                  }
+                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 233.21 }}
+                  resizeMode="contain"
+                />
+              )}
+            </Pressable>
+
+            {/* Card Voir le programme */}
+            <Pressable
+              style={styles.bottomCard}
+              onPress={() => Alert.alert('Programme', 'Navigation vers le programme')}
+            >
+              {({ pressed }) => (
+                <Image 
+                  source={pressed 
+                    ? require('../../../assets/ui/Programme/Card_Programme_press.png')
+                    : require('../../../assets/ui/Programme/Card_Programme.png')
+                  }
+                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
+                  resizeMode="contain"
+                />
+              )}
+            </Pressable>
+          </View>
+        </View>
         
-        {/* Header avec avatar et nom */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>👩🏻‍💻</Text>
-            </View>
-            <View>
-              <Text style={[styles.welcome, { color: theme.colors.text.secondary }]}>
-                Welcome 👋
-              </Text>
-              <Text style={[styles.userName, { color: theme.colors.text.primary }]}>
-                Sophia Muller
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Text style={styles.icon}>🔍</Text>
+        {/* Page 2 - NUTRITION */}
+        <View style={styles.pageContainer}>
+          <View style={styles.pageContent}>
+            {/* Widget Level 2 */}
+            <TouchableOpacity style={styles.topWidget} onPress={completeTask}>
+              {renderLevelProgress()}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Text style={styles.icon}>🔔</Text>
-            </TouchableOpacity>
+
+            {/* Button Analyser mon repas */}
+            <Pressable
+              style={styles.middleButton}
+              onPress={() => Alert.alert('Scanner', 'Ouverture du scanner')}
+            >
+              {({ pressed }) => (
+                <Image 
+                  source={pressed 
+                    ? require('../../../assets/ui/Nutrition/Button_Scan_Press.png')
+                    : require('../../../assets/ui/Nutrition/Button_Scan.png')
+                  }
+                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 233.21 }}
+                  resizeMode="contain"
+                />
+              )}
+            </Pressable>
+
+            {/* Card C'est l'heure du repas */}
+            <Pressable
+              style={styles.bottomCard}
+              onPress={() => Alert.alert('Repas', 'Navigation vers les repas')}
+            >
+              {({ pressed }) => (
+                <Image 
+                  source={pressed 
+                    ? require('../../../assets/ui/Nutrition/Card_Repas_Press.png')
+                    : require('../../../assets/ui/Nutrition/Card_Repas.png')
+                  }
+                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
+                  resizeMode="contain"
+                />
+              )}
+            </Pressable>
           </View>
         </View>
-
-        {/* Daily Challenge Card */}
-        <DashboardCard
-          title="Daily Challenge"
-          subtitle="Sprint for 30 seconds. Repeat this interval 5 times."
-          icon="🏃‍♀️"
-          backgroundColor="#8B7CF6"
-          style={styles.challengeCard}
-          onPress={() => Alert.alert('Challenge', 'Starting daily challenge...')}
-        >
-          <View style={styles.challengeActions}>
-            <TouchableOpacity style={styles.dismissButton}>
-              <Text style={styles.dismissText}>✕</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.doneButton}>
-              <Text style={styles.doneText}>Done ›</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </DashboardCard>
-
-        {/* Friends Section */}
-        <View style={styles.friendsSection}>
-          <Text style={[styles.friendsTitle, { color: theme.colors.text.primary }]}>
-            Friends:
-          </Text>
-          <View style={styles.friendsList}>
-            {friends.map((friend) => (
-              <TouchableOpacity key={friend.id} style={[styles.friendAvatar, { backgroundColor: friend.color }]}>
-                <Text style={styles.friendEmoji}>{friend.avatar}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Semaine Widget */}
-        <SemaineWidget days={weekDays} />
-
-        {/* Dashboard Section */}
-        <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-          Dashboard
-        </Text>
-
-        {/* Dashboard Grid */}
-        <View style={styles.dashboardGrid}>
-          {/* Première ligne */}
-          <View style={styles.gridRow}>
-            <View style={styles.gridItemLarge}>
-              <DashboardCard
-                title="Programme Sportif"
-                icon="🏋️"
-                backgroundColor="#F3F4F6"
-                textColor="#1F2937"
-                onPress={() => Alert.alert('Programme', 'Navigation vers programme sportif')}
-              />
-            </View>
-            <View style={styles.gridItemSmall}>
-              <DashboardCard
-                title="Régime Diet"
-                subtitle="Prochain repas"
-                icon="🍽️"
-                backgroundColor="#8B7CF6"
-                style={styles.smallCard}
-                onPress={() => Alert.alert('Diet', 'Navigation vers régime')}
-              >
-                <View style={styles.mealInfo}>
-                  <Text style={styles.mealTime}>3H:</Text>
-                  <Text style={styles.mealDescription}>
-                    Pâtes à la carbonara{'\n'}Blanc de dinde
-                  </Text>
-                </View>
-              </DashboardCard>
-            </View>
-          </View>
-
-          {/* Deuxième ligne */}
-          <View style={styles.gridRow}>
-            <View style={styles.gridItemSmall}>
-              <DashboardCard
-                title="Générer un programme"
-                icon="✨"
-                backgroundColor="#8B7CF6"
-                style={styles.smallCard}
-                onPress={() => Alert.alert('Générer', 'Génération d\'un nouveau programme')}
-              />
-            </View>
-            <View style={styles.gridItemLarge}>
-              <DashboardCard
-                title="Dashboard"
-                icon="📊"
-                backgroundColor="#8B7CF6"
-                onPress={() => Alert.alert('Stats', 'Navigation vers statistiques')}
-              >
-                <View style={styles.chartContainer}>
-                  <Text style={styles.chartPlaceholder}>📈 sthq</Text>
-                </View>
-              </DashboardCard>
-            </View>
-          </View>
-
-          {/* Troisième ligne */}
-          <View style={styles.gridRow}>
-            <View style={styles.gridItemLarge}>
-              <DashboardCard
-                title="Consulter les Objectifs."
-                icon="🎯"
-                backgroundColor="#F3F4F6"
-                textColor="#1F2937"
-                onPress={() => Alert.alert('Objectifs', 'Navigation vers objectifs')}
-              />
-            </View>
-            <View style={styles.gridItemSmall}>
-              <DashboardCard
-                title="Séries de Progression"
-                icon="⚡"
-                backgroundColor="#8B7CF6"
-                style={styles.smallCard}
-                onPress={() => Alert.alert('Progression', 'Navigation vers progression')}
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Bottom Cards */}
-        <View style={styles.bottomCards}>
-          <SquircleView
-            style={[styles.bottomCard, { backgroundColor: '#1F2937' }]}
-            squircleParams={{
-              cornerSmoothing: 0.6,
-              cornerRadius: 16,
-              fillColor: '#1F2937',
-            }}
-          >
-            <Text style={styles.bottomCardText}>100 BAKE A CAKE ON STREAM</Text>
-          </SquircleView>
-
-          <SquircleView
-            style={[styles.bottomCard, { backgroundColor: '#1F2937' }]}
-            squircleParams={{
-              cornerSmoothing: 0.6,
-              cornerRadius: 16,
-              fillColor: '#1F2937',
-            }}
-          >
-            <View style={styles.bottomCardContent}>
-              <View style={styles.bottomCardBadge}>
-                <Text style={styles.badgeText}>125</Text>
-              </View>
-              <Text style={styles.bottomCardText}>»</Text>
-              <View style={styles.stars}>
-                <Text>✨</Text>
-              </View>
-            </View>
-          </SquircleView>
-        </View>
-
       </ScrollView>
-    </SafeAreaView>
+      
+      {/* Page Indicator */}
+      {renderPageIndicator()}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 50, // Safe area top
+    paddingBottom: 85, // Tab bar height
   },
-  scrollContent: {
+  horizontalScrollContent: {
+    flexDirection: 'row',
+  },
+  pageContainer: {
+    width: screenWidth,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 100,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  
+  // Contenu de chaque page
+  pageContent: {
+    flex: 1,
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    marginBottom: 20,
+    width: '100%',
+    paddingVertical: 20,
+    paddingBottom: 60, // Espace pour les boutons de slide (réduit car on a déjà le padding du container)
   },
-  userInfo: {
-    flexDirection: 'row',
+  
+  // Widget du haut
+  topWidget: {
     alignItems: 'center',
+    marginBottom: 12,
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#E5E7EB',
-    justifyContent: 'center',
+  
+  // Bouton du milieu
+  middleButton: {
     alignItems: 'center',
-    marginRight: 12,
+    marginBottom: 12,
   },
-  avatarEmoji: {
-    fontSize: 24,
-  },
-  welcome: {
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
+  
+  // Grande carte du bas
+  bottomCard: {
     alignItems: 'center',
+    marginBottom: 12, // Même écart que les autres éléments
   },
-  icon: {
-    fontSize: 18,
-  },
-  challengeCard: {
-    marginBottom: 20,
+  
+  // Level progress container
+  levelContainer: {
     position: 'relative',
-  },
-  challengeActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 12,
+    justifyContent: 'center',
   },
-  dismissButton: {
+  
+  progressOverlay: {
     position: 'absolute',
-    top: -80,
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  semaineContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  weekOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+  },
+  
+  dayContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  dayText: {
+    color: '#faece3',
+    fontSize: 8,
+    fontWeight: '600',
+    marginBottom: 1,
+  },
+  
+  dayNumber: {
+    color: '#faece3',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  
+  todayDayText: {
+    color: '#1f2233',
+  },
+  
+  todayDayNumber: {
+    color: '#1f2233',
+  },
+
+  // Page Indicator
+  pageIndicator: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
     right: 0,
-  },
-  dismissText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  doneButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  doneText: {
-    color: '#8B7CF6',
-    fontWeight: 'bold',
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: -40,
-    right: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#1F2937',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  addText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  friendsSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  friendsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 12,
-  },
-  friendsList: {
-    flexDirection: 'row',
     gap: 8,
   },
-  friendAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  friendEmoji: {
-    fontSize: 20,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  dashboardGrid: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  gridRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  gridItemLarge: {
-    flex: 2,
-  },
-  gridItemSmall: {
-    flex: 1,
-  },
-  smallCard: {
-    minHeight: 100,
-  },
-  mealInfo: {
-    marginTop: 8,
-  },
-  mealTime: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  mealDescription: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    opacity: 0.8,
-    marginTop: 4,
-  },
-  chartContainer: {
-    marginTop: 12,
-    alignItems: 'center',
-  },
-  chartPlaceholder: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  bottomCards: {
-    gap: 12,
-  },
-  bottomCard: {
-    padding: 16,
-    minHeight: 60,
-    justifyContent: 'center',
-  },
-  bottomCardText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  bottomCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  bottomCardBadge: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  stars: {
-    flexDirection: 'row',
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
 });
