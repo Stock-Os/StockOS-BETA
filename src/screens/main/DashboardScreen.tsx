@@ -9,14 +9,34 @@ import {
   Dimensions,
   Image,
   Pressable,
+  Animated,
+  PixelRatio,
+  Platform,
 } from 'react-native';
+import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUserData } from '../../contexts/UserDataContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const fontScale = PixelRatio.getFontScale();
+const pixelRatio = PixelRatio.get();
 
-const W = screenWidth - 40; // Largeur pleine écran avec marges
+// iPhone 13 Pro Max dimensions (référence parfaite)
+const REFERENCE_WIDTH = 428;
+const REFERENCE_HEIGHT = 926;
+
+// Calcul des facteurs d'échelle basés sur l'iPhone 13 Pro Max
+const widthScale = screenWidth / REFERENCE_WIDTH;
+const heightScale = screenHeight / REFERENCE_HEIGHT;
+const scale = Math.min(widthScale, heightScale);
+
+// Fonction pour adapter les dimensions
+const scaleSize = (size: number) => Math.round(size * scale);
+const scaleFontSize = (size: number) => Math.round((size * scale) / fontScale);
+
+const W = screenWidth - scaleSize(40); // Largeur pleine écran avec marges
+const SCALE_FACTOR = 0.95; // Facteur de réduction pour laisser place au slider
 
 // Fonction pour obtenir les jours de la semaine
 const getDaysOfWeek = () => {
@@ -46,6 +66,82 @@ export const DashboardScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const weekDays = getDaysOfWeek();
 
+  const [fontsLoaded] = useFonts({
+    'WisterDemo': Platform.OS === 'android' 
+      ? require('../../../assets/fonts/Wister-Demo.otf')
+      : require('../../../assets/fonts/Wister-Demo.ttf'),
+    'Wister-Demo': require('../../../assets/fonts/Wister-Demo.otf'), // Android OTF
+  });
+
+  // Debug: Log font loading status
+  React.useEffect(() => {
+    console.log('Fonts loaded:', fontsLoaded, 'Platform:', Platform.OS);
+  }, [fontsLoaded]);
+
+  // Force font family based on platform and font loading
+  const getFontFamily = () => {
+    if (!fontsLoaded) return Platform.OS === 'ios' ? 'System' : 'Roboto';
+    return Platform.OS === 'android' ? 'Wister-Demo' : 'WisterDemo';
+  };
+
+  // Component Text personnalisé pour forcer la police sur Android
+  const CustomText = ({ children, style, ...props }) => {
+    return (
+      <Text
+        {...props}
+        style={[
+          style,
+          Platform.OS === 'android' && {
+            fontFamily: 'Wister-Demo',
+            textAlign: 'center',
+            textAlignVertical: 'center',
+          }
+        ]}
+        allowFontScaling={false}
+      >
+        {children}
+      </Text>
+    );
+  };
+
+  // Animations SÉQUENTIELLES PENDANT LE SLIDE
+  const scrollX = useRef(new Animated.Value(0)).current;
+  
+  // SLIDE VERS LA DROITE (Programme → Nutrition)
+  // Page Programme - sortie séquentielle : CARD (0-100%) → BOUTON (33-100%) → SECTION (66-100%)
+  const cardTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth],
+    outputRange: [0, -screenWidth],
+    extrapolate: 'clamp',
+  });
+  const middleButtonTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth * 0.33, screenWidth],
+    outputRange: [0, 0, -screenWidth], // Reste figé jusqu'à 33%
+    extrapolate: 'clamp',
+  });
+  const topWidgetTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth * 0.66, screenWidth],
+    outputRange: [0, 0, -screenWidth], // Reste figé jusqu'à 66%
+    extrapolate: 'clamp',
+  });
+
+  // Page Nutrition - entrée séquentielle : CARD (0-100%) → BOUTON (33-100%) → SECTION (66-100%)
+  const nutritionCardTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth],
+    outputRange: [screenWidth, 0],
+    extrapolate: 'clamp',
+  });
+  const nutritionButtonTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth * 0.33, screenWidth],
+    outputRange: [screenWidth, screenWidth, 0], // Reste hors écran jusqu'à 33%
+    extrapolate: 'clamp',
+  });
+  const nutritionTopWidgetTranslateX = scrollX.interpolate({
+    inputRange: [0, screenWidth * 0.66, screenWidth],
+    outputRange: [screenWidth, screenWidth, 0], // Reste hors écran jusqu'à 66%
+    extrapolate: 'clamp',
+  });
+
   // État pour les progressions
   const [waterProgress, setWaterProgress] = useState(23); // 23% comme dans l'image
   const [streakProgress, setStreakProgress] = useState(15); // Exemple
@@ -57,39 +153,43 @@ export const DashboardScreen: React.FC = () => {
   };
 
   const renderWeekDaysOverlay = () => {
-    const sectionHeight = (screenWidth - 40) * (435.91 / 1099.06);
-    const dayWidth = (screenWidth - 40) * 0.13;
-    const startX = (screenWidth - 40) * 0.095;
-    const dayY = sectionHeight * 0.65;
+    const scaledWidth = W * SCALE_FACTOR;
+    const sectionHeight = scaledWidth * (435.91 / 1099.06);
+    const dayWidth = scaledWidth * 0.13;
+    const startX = 0; // Start from 0 to center on section
+    const dayY = sectionHeight * 0.55;
     
     return (
       <View style={[styles.weekOverlay, { height: sectionHeight }]}>
-        {weekDays.map((day, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dayContainer,
-              {
-                left: startX + (index * dayWidth),
-                top: dayY,
-                width: dayWidth,
-              }
-            ]}
-          >
-            <Text style={[
-              styles.dayText,
-              day.isToday && styles.todayDayText
-            ]}>
-              {day.dayName}
-            </Text>
-            <Text style={[
-              styles.dayNumber,
-              day.isToday && styles.todayDayNumber
-            ]}>
-              {day.dayNumber}
-            </Text>
-          </View>
-        ))}
+        <View style={[styles.weekDaysContainer, { width: scaledWidth }]}>
+          {weekDays.map((day, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dayContainer,
+                {
+                  flex: 1,
+                  top: dayY,
+                }
+              ]}
+            >
+              <CustomText style={[
+                styles.dayText,
+                day.isToday && styles.todayDayText,
+                { fontFamily: getFontFamily() } // Force explicite multi-platform
+              ]}>
+                {day.dayName}
+              </CustomText>
+              <CustomText style={[
+                styles.dayNumber,
+                day.isToday && styles.todayDayNumber,
+                { fontFamily: getFontFamily() } // Force explicite multi-platform
+              ]}>
+                {String(day.dayNumber)}
+              </CustomText>
+            </View>
+          ))}
+        </View>
       </View>
     );
   };
@@ -118,17 +218,18 @@ export const DashboardScreen: React.FC = () => {
   };
 
   const renderLevelProgress = () => {
+    const scaledWidth = W * SCALE_FACTOR;
     return (
-      <View style={styles.levelContainer}>
+      <View style={[styles.levelContainer, { width: scaledWidth, alignSelf: 'center' }]}>
         <Image 
           source={require('../../../assets/ui/Nutrition/Level_Progress.png')}
-          style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+          style={{ width: scaledWidth, height: undefined, aspectRatio: 1099.06 / 435.91 }}
           resizeMode="contain"
         />
         <View style={styles.progressOverlay}>
           <Image 
             source={getProgressBarSource(waterProgress)}
-            style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+            style={{ width: scaledWidth, height: undefined, aspectRatio: 1099.06 / 435.91 }}
             resizeMode="contain"
           />
         </View>
@@ -144,134 +245,135 @@ export const DashboardScreen: React.FC = () => {
     });
   };
 
-  const renderPageIndicator = () => (
-    <View style={styles.pageIndicator}>
-      {[0, 1].map((page) => (
-        <TouchableOpacity
-          key={page}
-          style={[
-            styles.dot,
-            {
-              backgroundColor: currentPage === page ? '#1f2233' : '#414460',
-            }
-          ]}
-          onPress={() => handlePageChange(page)}
-        />
-      ))}
-    </View>
-  );
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ScrollView 
+      <Animated.ScrollView 
         ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
         onMomentumScrollEnd={(event) => {
           const page = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
           setCurrentPage(page);
         }}
-        contentContainerStyle={styles.horizontalScrollContent}
+        contentContainerStyle={[styles.horizontalScrollContent, { backgroundColor: theme.colors.background }]}
+        style={{ backgroundColor: theme.colors.background }}
+        scrollEventThrottle={16}
       >
         {/* Page 1 - PROGRAMME */}
-        <View style={styles.pageContainer}>
+        <View style={[styles.pageContainer, { backgroundColor: theme.colors.background }]}>
           <View style={styles.pageContent}>
             {/* Widget Semaine */}
-            <TouchableOpacity style={styles.topWidget}>
-              <View style={styles.semaineContainer}>
+            <Animated.View style={[{ transform: [{ translateX: topWidgetTranslateX }] }]}>
+              <TouchableOpacity style={[styles.topWidget, { width: W * SCALE_FACTOR, alignSelf: 'center' }]}>
+              <View style={[styles.semaineContainer, { width: W * SCALE_FACTOR, alignSelf: 'center' }]}>
                 <Image 
                   source={require('../../../assets/ui/Programme/Section_Semaine.png')}
-                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 435.91 }}
+                  style={{ width: W * SCALE_FACTOR, height: undefined, aspectRatio: 1099.06 / 435.91 }}
                   resizeMode="contain"
                 />
                 {renderWeekDaysOverlay()}
               </View>
             </TouchableOpacity>
+            </Animated.View>
 
             {/* Button Générer le programme */}
-            <Pressable
-              style={styles.middleButton}
-              onPress={() => Alert.alert('Génération', 'Génération du programme en cours...')}
-            >
+            <Animated.View style={[{ transform: [{ translateX: middleButtonTranslateX }] }]}>
+              <Pressable
+                style={[styles.middleButton, { width: W * SCALE_FACTOR, alignSelf: 'center' }]}
+                onPress={() => Alert.alert('Génération', 'Génération du programme en cours...')}
+              >
               {({ pressed }) => (
                 <Image 
                   source={pressed 
                     ? require('../../../assets/ui/Programme/Button_ProgrammeAI_press.png')
                     : require('../../../assets/ui/Programme/Button_ProgrammeAI.png')
                   }
-                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 233.21 }}
+                  style={{ width: W * SCALE_FACTOR, height: undefined, aspectRatio: 1099.06 / 233.21 }}
                   resizeMode="contain"
                 />
               )}
             </Pressable>
+            </Animated.View>
 
             {/* Card Voir le programme */}
-            <Pressable
-              style={styles.bottomCard}
-              onPress={() => Alert.alert('Programme', 'Navigation vers le programme')}
-            >
-              {({ pressed }) => (
-                <Image 
-                  source={pressed 
-                    ? require('../../../assets/ui/Programme/Card_Programme_press.png')
-                    : require('../../../assets/ui/Programme/Card_Programme.png')
-                  }
-                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
-                  resizeMode="contain"
-                />
-              )}
-            </Pressable>
+            <Animated.View style={[{ alignItems: 'center', marginBottom: 12 }, { transform: [{ translateX: cardTranslateX }] }]}>
+              <Pressable
+                onPress={() => Alert.alert('Programme', 'Navigation vers le programme')}
+              >
+                {({ pressed }) => (
+                  <Image 
+                    source={pressed 
+                      ? require('../../../assets/ui/Programme/Card_Programme_press.png')
+                      : require('../../../assets/ui/Programme/Card_Programme.png')
+                    }
+                    style={{ width: W, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
+                    resizeMode="contain"
+                  />
+                )}
+              </Pressable>
+            </Animated.View>
           </View>
         </View>
         
         {/* Page 2 - NUTRITION */}
-        <View style={styles.pageContainer}>
+        <View style={[styles.pageContainer, { backgroundColor: theme.colors.background }]}>
           <View style={styles.pageContent}>
             {/* Widget Level 2 */}
-            <TouchableOpacity style={styles.topWidget} onPress={completeTask}>
+            <Animated.View style={[{ transform: [{ translateX: nutritionTopWidgetTranslateX }] }]}>
+              <TouchableOpacity style={[styles.topWidget, { width: W * SCALE_FACTOR, alignSelf: 'center' }]} onPress={completeTask}>
               {renderLevelProgress()}
             </TouchableOpacity>
+            </Animated.View>
 
             {/* Button Analyser mon repas */}
-            <Pressable
-              style={styles.middleButton}
-              onPress={() => Alert.alert('Scanner', 'Ouverture du scanner')}
-            >
+            <Animated.View style={[{ transform: [{ translateX: nutritionButtonTranslateX }] }]}>
+              <Pressable
+                style={[styles.middleButton, { width: W * SCALE_FACTOR, alignSelf: 'center' }]}
+                onPress={() => Alert.alert('Scanner', 'Ouverture du scanner')}
+              >
               {({ pressed }) => (
                 <Image 
                   source={pressed 
                     ? require('../../../assets/ui/Nutrition/Button_Scan_Press.png')
                     : require('../../../assets/ui/Nutrition/Button_Scan.png')
                   }
-                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 233.21 }}
+                  style={{ width: W * SCALE_FACTOR, height: undefined, aspectRatio: 1099.06 / 233.21 }}
                   resizeMode="contain"
                 />
               )}
             </Pressable>
+            </Animated.View>
 
             {/* Card C'est l'heure du repas */}
-            <Pressable
-              style={styles.bottomCard}
-              onPress={() => Alert.alert('Repas', 'Navigation vers les repas')}
-            >
-              {({ pressed }) => (
-                <Image 
-                  source={pressed 
-                    ? require('../../../assets/ui/Nutrition/Card_Repas_Press.png')
-                    : require('../../../assets/ui/Nutrition/Card_Repas.png')
-                  }
-                  style={{ width: screenWidth - 40, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
-                  resizeMode="contain"
-                />
-              )}
-            </Pressable>
+            <Animated.View style={[{ alignItems: 'center', marginBottom: 12 }, { transform: [{ translateX: nutritionCardTranslateX }] }]}>
+              <Pressable
+                onPress={() => Alert.alert('Repas', 'Navigation vers les repas')}
+              >
+                {({ pressed }) => (
+                  <Image 
+                    source={pressed 
+                      ? require('../../../assets/ui/Nutrition/Card_Repas_Press.png')
+                      : require('../../../assets/ui/Nutrition/Card_Repas.png')
+                    }
+                    style={{ width: W, height: undefined, aspectRatio: 1099.06 / 1384.51 }}
+                    resizeMode="contain"
+                  />
+                )}
+              </Pressable>
+            </Animated.View>
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
       
-      {/* Page Indicator */}
-      {renderPageIndicator()}
     </View>
   );
 };
@@ -279,8 +381,8 @@ export const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50, // Safe area top
-    paddingBottom: 85, // Tab bar height
+    paddingTop: scaleSize(50), // Safe area top
+    paddingBottom: 0, // Pas de padding bottom, laissons la tab bar gérer l'espace
   },
   horizontalScrollContent: {
     flexDirection: 'row',
@@ -290,7 +392,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: scaleSize(20),
   },
   
   // Contenu de chaque page
@@ -299,27 +401,24 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
-    paddingVertical: 20,
-    paddingBottom: 60, // Espace pour les boutons de slide (réduit car on a déjà le padding du container)
+    paddingVertical: scaleSize(20),
+    paddingBottom: scaleSize(160), // Plus d'espace pour les boutons de slide
   },
   
   // Widget du haut
   topWidget: {
+    marginBottom: scaleSize(12),
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
   },
   
   // Bouton du milieu
   middleButton: {
+    marginBottom: scaleSize(12),
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
   },
   
-  // Grande carte du bas
-  bottomCard: {
-    alignItems: 'center',
-    marginBottom: 12, // Même écart que les autres éléments
-  },
   
   // Level progress container
   levelContainer: {
@@ -352,22 +451,33 @@ const styles = StyleSheet.create({
   },
   
   dayContainer: {
-    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },
   
+  weekDaysContainer: {
+    position: 'absolute',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    left: 0,
+    right: 0,
+    paddingHorizontal: scaleSize(25),
+  },
+  
   dayText: {
     color: '#faece3',
-    fontSize: 8,
+    fontSize: scaleFontSize(10),
     fontWeight: '600',
-    marginBottom: 1,
+    marginBottom: scaleSize(2),
+    fontFamily: Platform.OS === 'android' ? 'Wister-Demo' : 'WisterDemo',
   },
   
   dayNumber: {
     color: '#faece3',
-    fontSize: 10,
+    fontSize: scaleFontSize(18),
     fontWeight: '700',
+    fontFamily: Platform.OS === 'android' ? 'Wister-Demo' : 'WisterDemo',
   },
   
   todayDayText: {
@@ -378,20 +488,4 @@ const styles = StyleSheet.create({
     color: '#1f2233',
   },
 
-  // Page Indicator
-  pageIndicator: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
 });

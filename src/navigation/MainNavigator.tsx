@@ -70,7 +70,8 @@ export const MainNavigator: React.FC = () => {
   const { theme } = useTheme();
 
   return (
-    <Tab.Navigator
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: [
@@ -136,6 +137,7 @@ export const MainNavigator: React.FC = () => {
         }}
       />
     </Tab.Navigator>
+    </View>
   );
 };
 

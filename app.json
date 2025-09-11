@@ -14,6 +14,10 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "fonts": [
+      "./assets/fonts/Wister-Demo.ttf",
+      "./assets/fonts/Wister-Demo.otf"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.stockos.beta"
